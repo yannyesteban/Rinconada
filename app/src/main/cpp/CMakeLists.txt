@@ -5,10 +5,39 @@
 
 cmake_minimum_required(VERSION 3.4.1)
 
+add_library(
+        native_app_glue
+        STATIC
+        ${ANDROID_NDK}/sources/android/native_app_glue/android_native_app_glue.c
+)
+target_include_directories(
+        native_app_glue
+        PUBLIC
+        ${ANDROID_NDK}/sources/android/native_app_glue
+
+)
+set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -u ANativeActivity_onCreate")
+
+
+
 # Creates and names a library, sets it as either STATIC
 # or SHARED, and provides the relative paths to its source code.
 # You can define multiple libraries, and CMake builds them for you.
 # Gradle automatically packages shared libraries with your APK.
+
+
+add_library( # Sets the name of the library.
+        horse-engine
+
+        # Sets the library as a shared library.
+        SHARED
+
+        # Provides a relative path to your source file(s).
+        act/main.cpp
+        act/Windows.cpp
+        )
+
+
 
 add_library( # Sets the name of the library.
         native-lib
@@ -17,7 +46,9 @@ add_library( # Sets the name of the library.
         SHARED
 
         # Provides a relative path to your source file(s).
-        native-lib.cpp)
+        native-lib.cpp
+
+        )
 
 # Searches for a specified prebuilt library and stores the path as a
 # variable. Because CMake includes system libraries in the search path by
@@ -38,6 +69,16 @@ find_library( # Sets the name of the path variable.
 
 target_link_libraries( # Specifies the target library.
         native-lib
+        # Links the target library to the log library
+        # included in the NDK.
+        ${log-lib})
+target_link_libraries( # Specifies the target library.
+        horse-engine
+        android
+        native_app_glue
+
+        EGL
+        GLESv2
 
         # Links the target library to the log library
         # included in the NDK.
