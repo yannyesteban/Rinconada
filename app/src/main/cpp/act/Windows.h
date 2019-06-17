@@ -5,6 +5,11 @@
 #ifndef RINCONADA_WINDOWS_H
 #define RINCONADA_WINDOWS_H
 
+#include <EGL/egl.h>
+#include <GLES/gl.h>
+#include <GLES2/gl2.h>
+#include <GLES2/gl2ext.h>
+
 #include <android_native_app_glue.h>
 struct WindowInfo{
 
@@ -22,12 +27,33 @@ struct WindowInfo{
 
 class Windows {
 public:
+    Windows(WindowInfo *);
+
+    void init();
     void start();
     void end();
 
+    int32_t touchX;
+    int32_t touchY;
+
 private:
+    EGLDisplay display;
+    EGLSurface surface;
+    EGLContext context;
+
+
+    WindowInfo * info;
     int32_t width;
     int32_t height;
+
+    int initDisplay();
+    int closeDisplay();
+    int ActivityLoop();
+    void draw_frame();
+
+
+    static void handle_cmd(android_app* app, int32_t cmd);
+    static int handle_input(android_app* app, AInputEvent* event);
 };
 
 
