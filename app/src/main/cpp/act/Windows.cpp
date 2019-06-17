@@ -77,9 +77,50 @@ int Windows::ActivityLoop() {
     }
     //return 0;
 }
-void Windows::init(){
+bool Windows::init(){
 
-    leer(info->app->activity->assetManager, "vs.glsl");
+    const char* vShaderStr = leer(info->app->activity->assetManager, "vs.glsl");
+    const char* fShaderStr = leer(info->app->activity->assetManager, "fs.glsl");
+
+
+    GLuint vertexShader;
+    GLuint fragmentShader;
+    GLuint programObject;
+    GLint linked;
+// Load the vertex/fragment shaders
+    vertexShader = LoadShader(GL_VERTEX_SHADER, vShaderStr);
+    fragmentShader = LoadShader(GL_FRAGMENT_SHADER, fShaderStr);
+// Create the program object
+    programObject = glCreateProgram();
+    if(programObject == 0)
+        return 0;
+    glAttachShader(programObject, vertexShader);
+    glAttachShader(programObject, fragmentShader);
+// Bind vPosition to attribute 0
+    glBindAttribLocation(programObject, 0, "vPosition");
+// Link the program
+    glLinkProgram(programObject);
+// Check the link status
+    glGetProgramiv(programObject, GL_LINK_STATUS, &linked);
+    if(!linked)
+    {
+        GLint infoLen = 0;
+        glGetProgramiv(programObject, GL_INFO_LOG_LENGTH, &infoLen);
+        if(infoLen > 1)
+        {
+            char* infoLog = (char*)malloc(sizeof(char) * infoLen);
+            glGetProgramInfoLog(programObject, infoLen, NULL, infoLog);
+            //esLogMessage("Error linking program:\n%s\n", infoLog);
+            free(infoLog);
+        }
+        glDeleteProgram(programObject);
+        return false;
+    }
+// Store the program object
+    //programObject = programObject;
+    glClearColor(0.0f, 0.0f, 0.28f, 1.0f);
+    return true;
+
     /*
     const char* mPath;
     AAssetManager* mAssetManager;

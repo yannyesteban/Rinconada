@@ -29,13 +29,13 @@ class Windows {
 public:
     Windows(WindowInfo *);
 
-    void init();
+    bool init();
     void start();
     void end();
 
     int32_t touchX;
     int32_t touchY;
-
+    GLuint programObject;
 private:
     EGLDisplay display;
     EGLSurface surface;

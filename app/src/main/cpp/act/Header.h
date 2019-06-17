@@ -53,7 +53,7 @@ const char * leer(AAssetManager* AA, const char * pPath){
     mAssetManager = AA;
     mAsset = AAssetManager_open(mAssetManager, pPath, AASSET_MODE_UNKNOWN);
     if(mAsset!= NULL){
-        LOGW("------------------OK----------");
+        LOGW("------------COOOOOLLLLL----------");
     }else{
         LOGW("ERRRRRRRRRRRRRRROOORRRRRRRRR");
     }
