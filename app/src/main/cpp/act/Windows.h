@@ -50,6 +50,7 @@ private:
     int closeDisplay();
     int ActivityLoop();
     void draw_frame();
+    void Draw(GLuint programObject);
 
 
     static void handle_cmd(android_app* app, int32_t cmd);

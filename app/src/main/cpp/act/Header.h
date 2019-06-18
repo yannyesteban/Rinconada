@@ -16,15 +16,15 @@ GLuint LoadShader( GLenum type, const char *shaderSrc)
 {
     GLuint shader;
     GLint compiled;
-// Create the shader object
+    // Create the shader object
     shader = glCreateShader(type);
     if(shader == 0)
         return 0;
-// Load the shader source
+    // Load the shader source
     glShaderSource(shader, 1, &shaderSrc, NULL);
-// Compile the shader
+    // Compile the shader
     glCompileShader(shader);
-// Check the compile status
+    // Check the compile status
     glGetShaderiv(shader, GL_COMPILE_STATUS, &compiled);
 
     if(!compiled)

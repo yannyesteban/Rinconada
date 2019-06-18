@@ -5,6 +5,7 @@
 #include "Log.h"
 #include "Windows.h"
 #include "Header.h"
+#include "ShadersManager.h"
 
 Windows::Windows(WindowInfo * mInfo):
     info(mInfo){
@@ -81,26 +82,43 @@ bool Windows::init(){
 
     const char* vShaderStr = leer(info->app->activity->assetManager, "vs.glsl");
     const char* fShaderStr = leer(info->app->activity->assetManager, "fs.glsl");
-
+/*
+    const char* vShaderStr =
+            "attribute vec4 vPosition; \n"
+            "void main() \n"
+            "{ \n"
+            " gl_Position = vPosition; \n"
+            "} \n";
+    const char* fShaderStr =
+            "precision mediump float; \n"
+            "void main() \n"
+            "{ \n"
+            " gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0); \n"
+            "} \n";
+*/
 
     GLuint vertexShader;
     GLuint fragmentShader;
-    GLuint programObject;
+    //GLuint programObject;
     GLint linked;
 // Load the vertex/fragment shaders
     vertexShader = LoadShader(GL_VERTEX_SHADER, vShaderStr);
     fragmentShader = LoadShader(GL_FRAGMENT_SHADER, fShaderStr);
 // Create the program object
     programObject = glCreateProgram();
-    if(programObject == 0)
+
+    if(programObject == 0){
+        //LOGE("--ONE--------->");
         return 0;
+    }
+    //LOGE("--PASS--------->");
     glAttachShader(programObject, vertexShader);
     glAttachShader(programObject, fragmentShader);
-// Bind vPosition to attribute 0
+    // Bind vPosition to attribute 0
     glBindAttribLocation(programObject, 0, "vPosition");
-// Link the program
+    // Link the program
     glLinkProgram(programObject);
-// Check the link status
+    // Check the link status
     glGetProgramiv(programObject, GL_LINK_STATUS, &linked);
     if(!linked)
     {
@@ -111,13 +129,22 @@ bool Windows::init(){
             char* infoLog = (char*)malloc(sizeof(char) * infoLen);
             glGetProgramInfoLog(programObject, infoLen, NULL, infoLog);
             //esLogMessage("Error linking program:\n%s\n", infoLog);
+            //LOGE("\n\n(((%s)))\n\n", infoLog);
             free(infoLog);
+        }else{
+            //LOGE("\n\n(==========PASÓ SIIII==========)\n\n");
+
         }
         glDeleteProgram(programObject);
+        //LOGE("--TWO--------->");
         return false;
+    }else{
+       // LOGE("\n\n(==========PASÓ SIIII (2)==========)\n\n");
     }
 // Store the program object
     //programObject = programObject;
+    LOGE("programa:::: %d", programObject);
+    //LOGE("BIENNNNNNNNNNNNN--------->");
     glClearColor(0.0f, 0.0f, 0.28f, 1.0f);
     return true;
 
@@ -157,7 +184,7 @@ void Windows::start() {
     info->app->onAppCmd = handle_cmd;
     info->app->onInputEvent = handle_input;
 
-    init();
+
 
     ActivityLoop();
 }
@@ -219,14 +246,15 @@ int Windows::initDisplay() {
     glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_FASTEST);
     glEnable(GL_CULL_FACE);
     glDisable(GL_DEPTH_TEST);
-    //glViewport(100, 100, width/2, height/2);
-    glViewport(100, 100, 200, 200);
+    glViewport(100, 100, width, height);
+    //glViewport(100, 100, 200, 200);
 
-    return 1;
+    return 0;
 }
 
 
 int Windows::closeDisplay() {
+    //LOGE("--------->BYE!!!!!!!!!!!!!!!!");
     if (display != EGL_NO_DISPLAY) {
         eglMakeCurrent(display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
         if (context != EGL_NO_CONTEXT) {
@@ -240,18 +268,77 @@ int Windows::closeDisplay() {
     display = EGL_NO_DISPLAY;
     context = EGL_NO_CONTEXT;
     surface = EGL_NO_SURFACE;
+    LOGE("BYE!!!!!!!!!!!!!!!!");
     return 1;
 }
 
 void Windows::draw_frame() {
     // No display.
     if (display == NULL) {
+        LOGE("************************ CLOSE");
         return;
     }
 
-    glViewport(0, 0, 400,400);
-    glClearColor(0.0f,0.1f,0.3f, 1);
+    //glViewport(0, 0, 400,400);
+    //glClearColor(0.1f,0.4f,0.3f, 1);
+    //glClear(GL_COLOR_BUFFER_BIT);
+    LOGE("ancho = %d, alto = %d",width, height);
+    glClearColor(100,0,0, 1);
     glClear(GL_COLOR_BUFFER_BIT);
-    eglSwapBuffers(display, surface);
+    //init();
+
+    ShadersManager m =  ShadersManager();
+    m.mAssetManager = info->app->activity->assetManager;
+    m.setVS("vs.glsl");
+    m.setFS("fs.glsl");
+    m.Program1();
+    glClearColor(0.0f, 0.3f, 0.28f, 1.0f);
+    Draw(m.programObject);
+    LOGE("---------P:%d--V:%d--F:%d------", m.programObject, m.vertexShader, m.fragmentShader);
+    //eglSwapBuffers(display, surface);
     return;
+}
+
+void Windows::Draw(GLuint programObject)
+{
+    //UserData *userData = esContext->userData;
+    GLfloat vVertices1[] = {0.0f, 0.5f, 0.0f,
+                            -0.5f, -0.5f, 0.0f,
+                            0.5f, -0.5f, 0.0f};
+
+    GLfloat vVertices2[] = {1.0f, 1.0f, 0.0f,
+                            -1.0f, -1.0f, 0.0f,
+                            1.0f, -1.0f, 0.0f};
+
+    GLfloat vVertices[] = {-0.5f, 0.5f, 0.0f,
+                           -0.5f, -0.5f, 0.0f,
+
+                           0.0f, -0.5f, 0.0f,
+
+                           0.0f, -0.5f,0.0f,
+                           0.5f, -0.5f, 0.0f,
+                           0.5f,0.5f, 0.0f
+
+
+
+
+    };
+
+    LOGE("[ancho] = %d, alto = %d",width, height);
+    // Set the viewport
+    glViewport(0, 0, width, height);
+    //glViewport(0,0,400,400);
+    // Clear the color buffer
+    //glClearColor(0.4f,0.2f,0.3f, 1);
+    //glClear(GL_COLOR_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT);
+    // Use the program object
+
+    glUseProgram(programObject);
+    // Load the vertex data
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, vVertices);
+    glEnableVertexAttribArray(0);
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+    eglSwapBuffers(display, surface);
+    LOGE("******YES******");
 }

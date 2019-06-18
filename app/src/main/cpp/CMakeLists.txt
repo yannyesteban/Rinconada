@@ -35,6 +35,7 @@ add_library( # Sets the name of the library.
         # Provides a relative path to your source file(s).
         act/main.cpp
         act/Windows.cpp
+        act/ShadersManager.cpp
         )
 
 
