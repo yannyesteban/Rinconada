@@ -5,12 +5,20 @@
 //#include "Header.h"
 #include "Log.h"
 #include "Windows.h"
+#include "FileRead.h"
 void android_main(struct android_app* app) {
 
+    FileRead F = FileRead();
+    F.test(app->activity->assetManager, app->activity->externalDataPath, app->activity->internalDataPath);
+    //F.test(app->activity->assetManager, app->activity->internalDataPath);
+//app->activity->env->
 
+return;
     WindowInfo wInfo(app, 100, 100);
 
     Windows Windows(&wInfo);
     Windows.start();
+
+
 
 }
