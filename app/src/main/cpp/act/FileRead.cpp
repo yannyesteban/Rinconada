@@ -37,23 +37,26 @@ void FileRead::test(AAssetManager *mAssetManager, const char * paths, const char
     LOGE("%s", paths);
     LOGE("%s", paths2);
 
-    char * paths3=strcat((char *)paths2,"/hello.txt");
+    char * paths3=strcat((char *)paths2,"/hello4.txt");
 
     //FILE* file = fopen("/storage/emulated/0/Android/data/com.stable.rinconada/files/hello.txt","w+");
     //FILE* file = fopen("//storage/emulated/0/txt/newfile.txt","w+");
-    FILE * file = fopen(paths3, "w+");
+
+    char * paths4 = "/storage/emulated/0/txt/hello2.txt";
+
+    FILE * file = fopen(paths4, "w+");
     if (file != NULL)
     {
-        fputs("HOLA MUNDO tres veces!\n", file);
+        fputs("HOLA MUNDO SEIS veces!\n", file);
         fflush(file);
         fclose(file);
-        LOGE("YESSSS");
+        LOGE("SIP");
     }else{
 
-        LOGE("NOOOO");
+        LOGE("NOP");
     }
 
-
+LOGD("QUEEEEEEEEEE");
     AAsset* mAsset;
     mAsset = AAssetManager_open(mAssetManager, "hola.txt", AASSET_MODE_UNKNOWN);
     off_t fileLength = AAsset_getLength(mAsset);
