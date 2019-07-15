@@ -7,7 +7,7 @@
 #include <iostream>
 #include <string>
 #include <unistd.h>
-
+#include <android/asset_manager_jni.h>
 using namespace std;
 
 const char *  FileRead::Open(AAssetManager* mAssetManager, const char * pPath){
@@ -50,9 +50,9 @@ void FileRead::test(AAssetManager *mAssetManager, const char * externalDataPath,
     FILE * file = fopen(internalDataPath, "w+");
     if (file != NULL)
     {
-        fputs("HOLA MUNDO 8 veces!\n", file);
-        fputs("HOLA MUNDO 9 veces!\n", file);
-        fputs("HOLA MUNDO 10 veces!\n", file);
+        fputs("HOLA MUNDO 18 veces!\n", file);
+        fputs("HOLA MUNDO 19 veces!\n", file);
+        fputs("HOLA MUNDO 20 veces!\n", file);
         fflush(file);
         fclose(file);
         LOGE("SIP");
@@ -64,22 +64,15 @@ void FileRead::test(AAssetManager *mAssetManager, const char * externalDataPath,
 LOGD("QUEEEEEEEEEE");
     AAsset* mAsset;
     mAsset = AAssetManager_open(mAssetManager, "hola.txt", AASSET_MODE_UNKNOWN);
-    off_t outStart;
+    off_t outStart, fileLength;
     //off_t fileLength = AAsset_getLength(mAsset);
-    off_t fileLength = AAsset_getLength(mAsset);
+    //off_t fileLength = AAsset_getLength(mAsset);
     int g = AAsset_openFileDescriptor(mAsset,&outStart,&fileLength);
+    //int myfd = dup(g);
 
-
-    LOGE("fileLength %d", fileLength);
-    if (g) {
-        LOGE("si G");
-    } else{
-        LOGE("NO G");
-    }
-    FILE *fp = NULL;
-
-    FILE * ffpp = fdopen(g,"rb");
-    if (ffpp){
+    FILE * ffpp;
+    ffpp = fdopen(g, "rb");
+    if (ffpp != NULL){
         //always enters here
         LOGE("Bien 8000");
     } else{
@@ -88,7 +81,20 @@ LOGD("QUEEEEEEEEEE");
     }
 
 
+    AAsset_close(mAsset);
 
+    //LOGE("fileLength %d", fileLength);
+
+    FILE *fp = NULL;
+
+    char  buf[50]="";
+    size_t count;
+    //ssize_t read(g, buf, count);
+
+
+
+
+return;
 
     char *dataBuffer = (char *) malloc(fileLength);
 
