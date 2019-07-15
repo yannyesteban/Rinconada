@@ -7,8 +7,12 @@
 #include <iostream>
 #include <string>
 #include <unistd.h>
-#include <android/asset_manager_jni.h>
+#include <regex>
+
 using namespace std;
+const char * FileRead::_externalDataPath = "";
+const char * FileRead::_internalDataPath = "";
+AAssetManager* FileRead::_assetManager = nullptr;
 
 const char *  FileRead::Open(AAssetManager* mAssetManager, const char * pPath){
 
@@ -35,44 +39,63 @@ const char *  FileRead::Open(AAssetManager* mAssetManager, const char * pPath){
 
 }
 
+
+
 void FileRead::test(AAssetManager *mAssetManager, const char * externalDataPath, const char * internalDataPath) {
 
     LOGE("%s", externalDataPath);
     LOGE("%s", internalDataPath);
 
-    char * paths3=strcat((char *)internalDataPath,"/hello5.txt");
+    char aux[100];// = (char *)externalDataPath;
+    strcpy(aux, externalDataPath);
+    LOGE("AUX %s", aux);
+    char *paths3 = strcat((char *) internalDataPath, "/hello5.txt");
 
     //FILE* file = fopen("/storage/emulated/0/Android/data/com.stable.rinconada/files/hello.txt","w+");
     //FILE* file = fopen("//storage/emulated/0/txt/newfile.txt","w+");
 
-    char * paths4 =strcat((char *)externalDataPath,"/storage/18EE-0616/txt/newfile.txt");
-
-    FILE * file = fopen(internalDataPath, "w+");
-    if (file != NULL)
-    {
-        fputs("HOLA MUNDO 18 veces!\n", file);
-        fputs("HOLA MUNDO 19 veces!\n", file);
-        fputs("HOLA MUNDO 20 veces!\n", file);
+    char *paths4 = strcat((char *) externalDataPath, "/storage/18EE-0616/txt/newfile.txt");
+    LOGE("AUX %s", aux);
+    FILE *file = fopen(internalDataPath, "w+");
+    if (file != NULL) {
+        fputs("HOLA MUNDO 8 veces!\n", file);
+        fputs("HOLA MUNDO 9 veces!\n", file);
+        fputs("HOLA MUNDO 10 veces!\n", file);
         fflush(file);
         fclose(file);
         LOGE("SIP");
-    }else{
+    } else {
 
         LOGE("NOP");
     }
 
-LOGD("QUEEEEEEEEEE");
-    AAsset* mAsset;
+    LOGD("QUEEEEEEEEEE");
+    AAsset *mAsset;
     mAsset = AAssetManager_open(mAssetManager, "hola.txt", AASSET_MODE_UNKNOWN);
-    off_t outStart, fileLength;
+    off_t outStart;
     //off_t fileLength = AAsset_getLength(mAsset);
-    //off_t fileLength = AAsset_getLength(mAsset);
-    int g = AAsset_openFileDescriptor(mAsset,&outStart,&fileLength);
-    //int myfd = dup(g);
+    off_t fileLength = AAsset_getLength(mAsset);
+    int h = AAsset_openFileDescriptor(mAsset, &outStart, &fileLength);
 
-    FILE * ffpp;
-    ffpp = fdopen(g, "rb");
-    if (ffpp != NULL){
+    int g = dup(h);
+    lseek(g, outStart, SEEK_CUR); //NOTICE
+
+    //LOGE("fileLength %d", fileLength);
+
+    char *dataBuffer2 = (char *) malloc(fileLength);
+    memset(dataBuffer2, 0, fileLength);
+    read(g, dataBuffer2, fileLength);
+    LOGE("un buffer es %s, tamaño (%d)", dataBuffer2, strlen(dataBuffer2));
+
+    if (g) {
+        LOGE("si G");
+    } else{
+        LOGE("NO G");
+    }
+    FILE *fp = NULL;
+
+    FILE * ffpp = fdopen(g,"rb");
+    if (ffpp){
         //always enters here
         LOGE("Bien 8000");
     } else{
@@ -81,20 +104,33 @@ LOGD("QUEEEEEEEEEE");
     }
 
 
-    AAsset_close(mAsset);
 
-    //LOGE("fileLength %d", fileLength);
+    /************************/
 
-    FILE *fp = NULL;
+    AAssetDir* assetDir = AAssetManager_openDir(mAssetManager, "");
+    const char* filename = (const char*)NULL;
+    while ((filename = AAssetDir_getNextFileName(assetDir)) != NULL) {
+        char * paths8 =strcat((char *)aux,filename);
 
-    char  buf[50]="";
-    size_t count;
-    //ssize_t read(g, buf, count);
+        AAsset* asset = AAssetManager_open(mAssetManager, filename, AASSET_MODE_STREAMING);
+        char buf[BUFSIZ];
+        int nb_read = 0;
+
+        FILE* out = fopen(paths8, "w+");
+        LOGE("%s", paths8);
+        while ((nb_read = AAsset_read(asset, buf, BUFSIZ)) > 0)
+            fwrite(buf, nb_read, 1, out);
+        fclose(out);
+
+        AAsset_close(asset);
+    }
+    AAssetDir_close(assetDir);
+
+
+    /*************************/
 
 
 
-
-return;
 
     char *dataBuffer = (char *) malloc(fileLength);
 
@@ -108,7 +144,8 @@ return;
 
 
 
-    fp = fopen( internalDataPath,"rb+");
+    //fp = fopen( internalDataPath,"rb+");
+    fp = fopen( "assets/hola.txt","rb+");
     if (fp){
         //always enters here
 
@@ -116,7 +153,7 @@ return;
         size_t * lon;
        //read(fp,linea,lon);
        while(fgets(linea,20,fp)!=NULL){
-        LOGE("%s",linea);
+        LOGE("*******%s",linea);
        }
 
 fputs("yanny esteban", fp);
@@ -130,4 +167,36 @@ LOGE ("END....");
 fclose(fp);
    // fclose(ffpp);.
     LOGE("%s",internalDataPath);
+}
+
+void FileRead::AA() {
+
+LOGE("%d", FileRead::s_value);
+}
+
+int FileRead::s_value=4;
+
+void FileRead::setAssetManager(AAssetManager *mmAssetManager) {
+    FileRead::_assetManager = mmAssetManager;
+}
+
+
+int FileRead::print(const char *path) {
+    AAsset *mAsset;
+    mAsset = AAssetManager_open(_assetManager, path, AASSET_MODE_UNKNOWN);
+    off_t outStart;
+    off_t fileLength = AAsset_getLength(mAsset);
+
+    char *dataBuffer = (char *) malloc(fileLength);
+
+    AAsset_read(mAsset, dataBuffer, fileLength);
+    LOGE("data buffer: %s", dataBuffer);
+    return 0;
+}
+
+
+
+void FileRead::setDataPath(const char *internalDataPath, const char *externalDataPath) {
+    _internalDataPath=internalDataPath;
+    _externalDataPath=externalDataPath;
 }
