@@ -5,6 +5,7 @@
 #include "FileRead.h"
 #include <fstream>
 #include <iostream>
+#include <sstream>
 #include <string>
 #include <unistd.h>
 #include <regex>
@@ -190,7 +191,46 @@ int FileRead::print(const char *path) {
     char *dataBuffer = (char *) malloc(fileLength);
 
     AAsset_read(mAsset, dataBuffer, fileLength);
-    LOGE("data buffer: %s", dataBuffer);
+
+
+    std::stringstream ss(dataBuffer);
+    std::string to;
+    if (dataBuffer != NULL)
+    {
+        while (std::getline(ss, to)) {//, '\n'
+
+            char lineHeader[128];
+            // Lee la primera palabra de la línea
+
+            //LOGE(".%s", to.c_str());
+            //std::cout << to.c_str() << std::endl;
+            //cout << "x: " << to << endl;
+
+            sscanf(to.c_str(), "%s", lineHeader);
+            const char * xx, *xy, *xz;
+           // LOGE("%s", to.c_str());
+            if ( strcmp( lineHeader, "v" ) == 0 ){
+               // LOGE("====%s", to.c_str());
+                sscanf(to.c_str(), "%*s %s %s %s", xx, xy, xz);
+
+                LOGE("v:...(%s), (%s), (%s)", xx, xy, xz);
+            }else if(strcmp( lineHeader, "vn" ) == 0){
+                sscanf(to.c_str(), "%*s %s %s %s", xx, xy, xz);
+
+                LOGE("vn:...(%s), (%s), (%s)", xx, xy, xz);
+            }else if(strcmp( lineHeader, "f" ) == 0){
+                sscanf(to.c_str(), "%*s %s %s %s", xx, xy, xz);
+
+                LOGE("f:...(%s), (%s), (%s)", xx, xy, xz);
+            }
+
+        }
+    }
+
+    LOGE("QUE");
+    //LOGE("data buffer: %s", dataBuffer);
+
+    free(dataBuffer);
     return 0;
 }
 
