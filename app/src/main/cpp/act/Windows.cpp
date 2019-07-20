@@ -116,6 +116,7 @@ bool Windows::init(){
     glAttachShader(programObject, fragmentShader);
     // Bind vPosition to attribute 0
     glBindAttribLocation(programObject, 0, "vPosition");
+    glBindAttribLocation(programObject, 1, "v_color");
     // Link the program
     glLinkProgram(programObject);
     // Check the link status
@@ -299,8 +300,7 @@ void Windows::draw_frame() {
     return;
 }
 
-void Windows::Draw(GLuint programObject)
-{
+void Windows::Draw(GLuint programObject) {
     //UserData *userData = esContext->userData;
     GLfloat vVertices1[] = {0.0f, 0.5f, 0.0f,
                             -0.5f, -0.5f, 0.0f,
@@ -312,17 +312,22 @@ void Windows::Draw(GLuint programObject)
 
     GLfloat vVertices[] = {-0.5f, 0.5f, 0.0f,
                            -0.5f, -0.5f, 0.0f,
-
                            0.0f, -0.5f, 0.0f,
 
                            0.0f, -0.5f,0.0f,
                            0.5f, -0.5f, 0.0f,
                            0.5f,0.5f, 0.0f
-
-
-
-
     };
+
+    GLfloat vColors[] = {1.0f, 0.0f, 0.0f,
+                           0.5f, 1.0f, 0.0f,
+                           0.0f, 0.5f, 0.0f,
+
+                           0.0f, 0.5f,0.0f,
+                           0.5f, 0.5f, 1.0f,
+                           1.5f,1.0f, 1.0f
+    };
+
 
     LOGE("[ancho] = %d, alto = %d",width, height);
     // Set the viewport
@@ -336,8 +341,19 @@ void Windows::Draw(GLuint programObject)
 
     glUseProgram(programObject);
     // Load the vertex data
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, vVertices);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+    glEnableVertexAttribArray(1);
     glEnableVertexAttribArray(0);
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, vVertices);
+
+
+
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, vColors);
+
+
     glDrawArrays(GL_TRIANGLES, 0, 6);
     eglSwapBuffers(display, surface);
     LOGE("******YES******");

@@ -14,6 +14,7 @@ target_include_directories(
         native_app_glue
         PUBLIC
         ${ANDROID_NDK}/sources/android/native_app_glue
+        ${ANDROID_NDK}/sources/glm
 
 )
 set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -u ANativeActivity_onCreate")

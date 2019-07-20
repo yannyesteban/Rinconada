@@ -18,13 +18,13 @@ FileRead::AA();
     FileRead F = FileRead();
 
 
-    F.print("hola.txt");
-    return;
-    F.test(app->activity->assetManager, app->activity->externalDataPath, app->activity->internalDataPath);
+    //F.print("hola.txt");
+    //return;
+    //F.test(app->activity->assetManager, app->activity->externalDataPath, app->activity->internalDataPath);
     //F.test(app->activity->assetManager, app->activity->internalDataPath);
 //app->activity->env->
 
-return;
+//return;
     WindowInfo wInfo(app, 100, 100);
 
     Windows Windows(&wInfo);

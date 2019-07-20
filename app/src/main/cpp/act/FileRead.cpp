@@ -9,7 +9,7 @@
 #include <string>
 #include <unistd.h>
 #include <regex>
-
+#include <glm/glm.hpp>
 using namespace std;
 const char * FileRead::_externalDataPath = "";
 const char * FileRead::_internalDataPath = "";
@@ -195,10 +195,12 @@ int FileRead::print(const char *path) {
 
     std::stringstream ss(dataBuffer);
     std::string to;
+    LOGE("uno");
     if (dataBuffer != NULL)
     {
+        LOGE("dos");
         while (std::getline(ss, to)) {//, '\n'
-
+            //LOGE("tres");
             char lineHeader[128];
             // Lee la primera palabra de la línea
 
@@ -207,22 +209,34 @@ int FileRead::print(const char *path) {
             //cout << "x: " << to << endl;
 
             sscanf(to.c_str(), "%s", lineHeader);
-            const char * xx, *xy, *xz;
-           // LOGE("%s", to.c_str());
+            //const char * xx, *xy, *xz;
+
+            char  xx[20], xy[20], xz[20];
+            //LOGE("%s", to.c_str());
             if ( strcmp( lineHeader, "v" ) == 0 ){
-               // LOGE("====%s", to.c_str());
+
+                glm::vec3 vertex;
+                sscanf(to.c_str(), "%*s %f %f %f", &vertex.x, &vertex.y, &vertex.z );
+
+                LOGE("v-> %f", vertex.x);
+                LOGE("====%s", to.c_str());
+
+                //sscanf(to.c_str(), "%*c %s %s %s", &xx, &xy, &xz);
                 sscanf(to.c_str(), "%*s %s %s %s", xx, xy, xz);
 
                 LOGE("v:...(%s), (%s), (%s)", xx, xy, xz);
             }else if(strcmp( lineHeader, "vn" ) == 0){
+                LOGE("vn");
                 sscanf(to.c_str(), "%*s %s %s %s", xx, xy, xz);
 
                 LOGE("vn:...(%s), (%s), (%s)", xx, xy, xz);
             }else if(strcmp( lineHeader, "f" ) == 0){
+                LOGE("f");
                 sscanf(to.c_str(), "%*s %s %s %s", xx, xy, xz);
 
                 LOGE("f:...(%s), (%s), (%s)", xx, xy, xz);
             }
+
 
         }
     }

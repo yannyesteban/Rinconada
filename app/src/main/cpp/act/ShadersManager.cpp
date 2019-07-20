@@ -57,6 +57,7 @@ int ShadersManager::Program1(){
     glAttachShader(programObject, fragmentShader);
     // Bind vPosition to attribute 0
     glBindAttribLocation(programObject, 0, "vPosition");
+    glBindAttribLocation(programObject, 1, "v_color");
     // Link the program
     glLinkProgram(programObject);
     // Check the link status
