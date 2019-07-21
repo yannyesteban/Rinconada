@@ -9,6 +9,8 @@
 #include <GLES/gl.h>
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 #include <android_native_app_glue.h>
 struct WindowInfo{
@@ -33,6 +35,9 @@ public:
     void start();
     void end();
 
+    void test();
+    void test2();
+    void test3();
     int32_t touchX;
     int32_t touchY;
     GLuint programObject;

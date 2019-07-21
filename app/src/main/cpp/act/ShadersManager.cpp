@@ -58,8 +58,18 @@ int ShadersManager::Program1(){
     // Bind vPosition to attribute 0
     glBindAttribLocation(programObject, 0, "vPosition");
     glBindAttribLocation(programObject, 1, "v_color");
+
+
+/*
+    GLuint kk = glGetUniformLocation(programObject, "KKK");
+    LOGE("yanny kkk => %d", kk );
+*/
+    //glUniform4fv(location, coord);
     // Link the program
     glLinkProgram(programObject);
+
+
+
     // Check the link status
     glGetProgramiv(programObject, GL_LINK_STATUS, &linked);
     if(!linked) {
@@ -74,7 +84,8 @@ int ShadersManager::Program1(){
         glDeleteProgram(programObject);
         return false;
     }
-
+    GLuint MatrixID = glGetUniformLocation(programObject, "MVP");
+    LOGE("yanny MVP => %d", MatrixID );
     return true;
 }
 
