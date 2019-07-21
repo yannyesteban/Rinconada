@@ -38,6 +38,8 @@ public:
     void test();
     void test2();
     void test3();
+
+    void loadTexture();
     int32_t touchX;
     int32_t touchY;
     GLuint programObject;

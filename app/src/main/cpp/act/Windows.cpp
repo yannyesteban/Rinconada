@@ -6,7 +6,19 @@
 #include "Windows.h"
 #include "Header.h"
 #include "ShadersManager.h"
+#include <png.h>
 GLuint MatrixID;
+GLfloat px=0;
+GLfloat py=0;
+GLfloat rx=0.0f;
+GLfloat ry=0.0f;
+GLfloat rz=0.0f;
+
+GLfloat ex=1.0f;
+GLfloat ey=0.0f;
+GLfloat ez=0.0f;
+GLfloat aspect=1.0f;
+
 Windows::Windows(WindowInfo * mInfo):
     info(mInfo){
 
@@ -42,7 +54,79 @@ int Windows::handle_input(android_app* app, AInputEvent* event){
         windows.touchX = AMotionEvent_getX(event, 0);
         windows.touchY = AMotionEvent_getY(event, 0);
         LOGI("TOCA AQUI x %d\ty %d\n",windows.touchX, windows.touchY);
+        static GLushort mode = 0;
+        if(windows.touchX>=0 && windows.touchX<200){
+            if(windows.touchY>=1500 && windows.touchY<1800){
 
+                mode = (mode+1) % 3;
+                LOGI("trans Mode %d", mode);
+
+
+            }
+        }
+        switch(mode){
+            case 0:
+                ex=1.0f;
+                ey=0.0f;
+                ez=0.0f;
+                break;
+            case 1:
+                ex=0.0f;
+                ey=1.0f;
+                ez=0.0f;
+                break;
+            case 2:
+                ex=0.0f;
+                ey=0.0f;
+                ez=1.0f;
+                break;
+
+        }
+
+        if(windows.touchX>=0 && windows.touchX<200){
+            if(windows.touchY>=0 && windows.touchY<200){
+                LOGI("trans PX px-");
+                px -= 0.05;
+
+            }
+        }
+        if(windows.touchX>=800 && windows.touchX<1000){
+            if(windows.touchY>=0 && windows.touchY<200){
+                LOGI("trans PX px+");
+                px += 0.05;
+            }
+        }
+
+
+        if(windows.touchX>=0 && windows.touchX<200){
+            if(windows.touchY>=200 && windows.touchY<400){
+                LOGI("trans PY py-");
+                py -= 0.05;
+
+            }
+        }
+        if(windows.touchX>=800 && windows.touchX<1000){
+            if(windows.touchY>=200 && windows.touchY<400){
+                LOGI("trans PY py+");
+                py += 0.05;
+
+            }
+        }
+
+
+        if(windows.touchX>=0 && windows.touchX<200){
+            if(windows.touchY>=400 && windows.touchY<600){
+                LOGI("trans Rota x-");
+
+                rx -= 2.0;
+            }
+        }
+        if(windows.touchX>=800 && windows.touchX<1000){
+            if(windows.touchY>=400 && windows.touchY<600){
+                LOGI("trans Rota x+");
+                rx += 2.0;
+            }
+        }
 
 
 
@@ -243,6 +327,13 @@ int Windows::initDisplay() {
     eglQuerySurface(display, surface, EGL_WIDTH, &width);
     eglQuerySurface(display, surface, EGL_HEIGHT, &height);
 
+    if(height>width){
+        aspect = (float)width/(float)height;
+    }else{
+        aspect = (float)height/(float)width;
+    }
+
+    LOGI("aspect2 %f w:%d, h:%d ", aspect, width, height);
     // Initialize GL state.
     glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_FASTEST);
     glEnable(GL_CULL_FACE);
@@ -339,7 +430,7 @@ void Windows::Draw(GLuint programObject) {
     glClear(GL_COLOR_BUFFER_BIT);
     // Use the program object
     MatrixID = glGetUniformLocation(programObject, "MVP");
-    LOGE("yanny => %d", MatrixID );
+    //LOGE("yanny => %d", MatrixID );
     glUseProgram(programObject);
     //eglSwapBuffers(display, surface);
     test3();
@@ -408,7 +499,7 @@ void Windows::test() {
 
     glDrawArrays(GL_TRIANGLES, 0, 3);
     eglSwapBuffers(display, surface);
-LOGE("hola");
+    //LOGE("hola");
     glDeleteBuffers(2, vboIds);
 
 }
@@ -473,17 +564,20 @@ void Windows::test3() {
     glDepthFunc(GL_LESS);
 
     // Projection matrix : 45° Field of View, 4:3 ratio, display range : 0.1 unit <-> 100 units
-    glm::mat4 Projection = glm::perspective(glm::radians(45.0f), 4.0f / 3.0f, 0.1f, 100.0f);
+    glm::mat4 Projection = glm::perspective(glm::radians(45.0f), 4.0f / 4.0f, 0.1f, 100.0f);
     // Camera matrix
     glm::mat4 View       = glm::lookAt(
-            glm::vec3(4,3,-3), // Camera is at (4,3,-3), in World Space
+            glm::vec3(0+px,0+py,-4), // Camera is at (4,3,-3), in World Space
             glm::vec3(0,0,0), // and looks at the origin
             glm::vec3(0,1,0)  // Head is up (set to 0,-1,0 to look upside-down)
     );
     // Model matrix : an identity matrix (model will be at the origin)
     glm::mat4 Model      = glm::mat4(1.0f);
+    LOGI("aspect1 %d", aspect);
+    Model = glm::scale(Model,glm::vec3(1.0f,1.0f*aspect,1.0f));
+    Model = glm::rotate(Model,glm::radians(rx),glm::vec3(ex,ey,ez));
     // Our ModelViewProjection : multiplication of our 3 matrices
-    glm::mat4 MVP        = Projection * View * Model; // Remember, matrix multiplication is the other way around
+    glm::mat4 MVP        = Projection * View * Model ; // Remember, matrix multiplication is the other way around
 
     static const GLfloat g_vertex_buffer_data[] = {
             -1.0f,-1.0f,-1.0f,
@@ -525,37 +619,42 @@ void Windows::test3() {
     };
 
     // One color for each vertex. They were generated randomly.
-    static const GLfloat g_color_buffer_data[] = {
+    static const GLfloat g_color_buffer_data1[] = {
             0.583f,  0.771f,  0.014f,
             0.609f,  0.115f,  0.436f,
             0.327f,  0.483f,  0.844f,
             0.822f,  0.569f,  0.201f,
             0.435f,  0.602f,  0.223f,
             0.310f,  0.747f,  0.185f,
+
             0.597f,  0.770f,  0.761f,
             0.559f,  0.436f,  0.730f,
             0.359f,  0.583f,  0.152f,
             0.483f,  0.596f,  0.789f,
             0.559f,  0.861f,  0.639f,
             0.195f,  0.548f,  0.859f,
+
             0.014f,  0.184f,  0.576f,
             0.771f,  0.328f,  0.970f,
             0.406f,  0.615f,  0.116f,
             0.676f,  0.977f,  0.133f,
             0.971f,  0.572f,  0.833f,
             0.140f,  0.616f,  0.489f,
+
             0.997f,  0.513f,  0.064f,
             0.945f,  0.719f,  0.592f,
             0.543f,  0.021f,  0.978f,
             0.279f,  0.317f,  0.505f,
             0.167f,  0.620f,  0.077f,
             0.347f,  0.857f,  0.137f,
+
             0.055f,  0.953f,  0.042f,
             0.714f,  0.505f,  0.345f,
             0.783f,  0.290f,  0.734f,
             0.722f,  0.645f,  0.174f,
             0.302f,  0.455f,  0.848f,
             0.225f,  0.587f,  0.040f,
+
             0.517f,  0.713f,  0.338f,
             0.053f,  0.959f,  0.120f,
             0.393f,  0.621f,  0.362f,
@@ -563,7 +662,53 @@ void Windows::test3() {
             0.820f,  0.883f,  0.371f,
             0.982f,  0.099f,  0.879f
     };
-LOGE("yanny => %d", MatrixID );
+
+    static const GLfloat g_color_buffer_data[] = {
+            0.999f,  0.000f,  0.999f,//5
+            0.999f,  0.000f,  0.999f,//5
+            0.999f,  0.000f,  0.999f,//5
+            0.222f,  0.222f,  0.222f,//2
+            0.222f,  0.222f,  0.222f,//2
+            0.222f,  0.222f,  0.222f,//2
+
+            0.999f,  0.200f,  0.000f,//4
+            0.999f,  0.200f,  0.000f,//4
+            0.999f,  0.200f,  0.000f,//4
+            0.222f,  0.222f,  0.222f,//2
+            0.222f,  0.222f,  0.222f,//2
+            0.222f,  0.222f,  0.222f,//2
+
+            0.999f,  0.000f,  0.999f,//5
+            0.999f,  0.000f,  0.999f,//5
+            0.999f,  0.000f,  0.999f,//5
+            0.999f,  0.200f,  0.000f,//4
+            0.999f,  0.200f,  0.000f,//4
+            0.999f,  0.200f,  0.000f,//4
+
+            0.000f,  0.999f,  0.000f,//6
+            0.000f,  0.999f,  0.000f,//6
+            0.000f,  0.999f,  0.000f,//6
+            0.999f,  0.999f,  0.000f,//3
+            0.999f,  0.999f,  0.000f,//3
+            0.999f,  0.999f,  0.000f,//3
+
+            0.999f,  0.999f,  0.000f,//3
+            0.999f,  0.999f,  0.000f,//3
+            0.999f,  0.999f,  0.000f,//3
+            0.000f,  0.999f,  0.999f,//1
+            0.000f,  0.999f,  0.999f,//1
+            0.000f,  0.999f,  0.999f,//1
+
+            0.000f,  0.999f,  0.999f,//1
+            0.000f,  0.999f,  0.999f,//1
+            0.000f,  0.999f,  0.999f,//1
+            0.000f,  0.999f,  0.000f,//6
+            0.000f,  0.999f,  0.000f,//6
+            0.000f,  0.999f,  0.000f,//6
+
+    };
+
+    //LOGE("yanny => %d", MatrixID );
     GLuint vertexbuffer;
     glGenBuffers(1, &vertexbuffer);
     glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
@@ -614,3 +759,11 @@ LOGE("yanny => %d", MatrixID );
     glDeleteBuffers(1, &vertexbuffer);
     glDeleteBuffers(1, &colorbuffer);
 }
+
+void Windows::loadTexture(){
+    png_uint_32 width, height;
+
+        return;
+    }
+
+

@@ -6,6 +6,10 @@
 #include "Log.h"
 #include "Windows.h"
 #include "FileRead.h"
+#include <png.h>
+#include <pngconf.h>
+
+
 void android_main(struct android_app* app) {
 
 

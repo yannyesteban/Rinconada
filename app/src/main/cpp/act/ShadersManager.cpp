@@ -84,8 +84,8 @@ int ShadersManager::Program1(){
         glDeleteProgram(programObject);
         return false;
     }
-    GLuint MatrixID = glGetUniformLocation(programObject, "MVP");
-    LOGE("yanny MVP => %d", MatrixID );
+    //GLuint MatrixID = glGetUniformLocation(programObject, "MVP");
+    //LOGE("yanny MVP => %d", MatrixID );
     return true;
 }
 

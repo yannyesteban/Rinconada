@@ -10,15 +10,31 @@ add_library(
         STATIC
         ${ANDROID_NDK}/sources/android/native_app_glue/android_native_app_glue.c
 )
+# Sets lib_src_DIR to the path of the target CMake project.
+set( lib_src_DIR ${ANDROID_NDK}/sources/libpng )
 target_include_directories(
         native_app_glue
         PUBLIC
         ${ANDROID_NDK}/sources/android/native_app_glue
         ${ANDROID_NDK}/sources/glm
+       # ${lib_src_DIR}/jni
 
 )
+include_directories( ${lib_src_DIR}/jni )
 set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -u ANativeActivity_onCreate")
 
+
+
+# library and names it lib_gmath.
+add_library( libpng STATIC IMPORTED )
+set_target_properties( # Specifies the target library.
+        libpng
+
+        # Specifies the parameter you want to define.
+        PROPERTIES IMPORTED_LOCATION
+
+        # Provides the path to the library you want to import.
+        ${lib_src_DIR}/obj/local/${ANDROID_ABI}/libpng.a )
 
 
 # Creates and names a library, sets it as either STATIC
@@ -82,7 +98,8 @@ target_link_libraries( # Specifies the target library.
 
         EGL
         GLESv2
-
+        libpng
+        z
         # Links the target library to the log library
         # included in the NDK.
         ${log-lib})
