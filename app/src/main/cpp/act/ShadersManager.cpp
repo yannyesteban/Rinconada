@@ -58,6 +58,7 @@ int ShadersManager::Program1(){
     // Bind vPosition to attribute 0
     glBindAttribLocation(programObject, 0, "vPosition");
     glBindAttribLocation(programObject, 1, "v_color");
+    glBindAttribLocation(programObject, 2, "aTexture");
 
 
 /*

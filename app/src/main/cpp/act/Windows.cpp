@@ -1,12 +1,23 @@
 //
 // Created by yanny on 14/6/2019.
 //
+
+
 #include <cstdlib>
 #include "Log.h"
 #include "Windows.h"
 #include "Header.h"
 #include "ShadersManager.h"
 #include <png.h>
+#include "loadpng.h"
+
+#define VERTEX_POS_SIZE 3 // x, y and z
+#define VERTEX_NORMAL_SIZE 3 // x, y and z
+#define VERTEX_TEXCOORD0_SIZE 2 // s and t
+#define VERTEX_POS_INDX 0
+#define VERTEX_NORMAL_INDX 1
+#define VERTEX_TEXCOORD0_INDX 2
+
 GLuint MatrixID;
 GLfloat px=0;
 GLfloat py=0;
@@ -433,7 +444,7 @@ void Windows::Draw(GLuint programObject) {
     //LOGE("yanny => %d", MatrixID );
     glUseProgram(programObject);
     //eglSwapBuffers(display, surface);
-    test3();
+    test4();
     return;
     // Load the vertex data
     glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -759,6 +770,65 @@ void Windows::test3() {
     glDeleteBuffers(1, &vertexbuffer);
     glDeleteBuffers(1, &colorbuffer);
 }
+
+void Windows::test4() {
+
+
+    GLfloat vVertices[] = {-0.5F,  0.5f,  0.0f,  1.0f, 0.0f,  1.0f, 0.0f, 0.0f,
+                           -0.5F, -0.5f,  0.0f,  1.0f, 0.0f,  1.0f, 1.0f, 0.0f,
+                           0.0F, -0.5f,  0.0f,  0.0f, 0.0f,  0.6f, 1.0f, 1.0f
+
+
+    };
+
+    GLushort indices[] = {0,1,2};
+    GLint numIndices=3;
+    GLint numVertices = 3;
+    GLint vtxStride = 8*sizeof(GLfloat);
+    GLuint offset = 0;
+    GLuint vboIds[2];
+// vboIds[0] – used to store vertex attribute data
+// vboIds[1] – used to store element indices
+    glGenBuffers(2, vboIds);
+    glBindBuffer(GL_ARRAY_BUFFER, vboIds[0]);
+    glBufferData(GL_ARRAY_BUFFER, vtxStride * numVertices, vVertices, GL_STATIC_DRAW);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vboIds[1]);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLushort) * numIndices, indices, GL_STATIC_DRAW);
+
+
+
+    glEnableVertexAttribArray(VERTEX_POS_INDX);
+    glEnableVertexAttribArray(VERTEX_NORMAL_INDX);
+    glEnableVertexAttribArray(VERTEX_TEXCOORD0_INDX);
+
+    glVertexAttribPointer(VERTEX_POS_INDX, VERTEX_POS_SIZE, GL_FLOAT, GL_FALSE, vtxStride, (const void*)offset);
+    offset += VERTEX_POS_SIZE * sizeof(GLfloat);
+    glVertexAttribPointer(VERTEX_NORMAL_INDX, VERTEX_NORMAL_SIZE,    GL_FLOAT, GL_FALSE, vtxStride,     (const void*)offset);
+    /**/
+    offset += VERTEX_NORMAL_SIZE * sizeof(GLfloat);
+    glVertexAttribPointer(VERTEX_TEXCOORD0_INDX,     VERTEX_TEXCOORD0_SIZE,    GL_FLOAT, GL_FALSE, vtxStride,    (const void*)offset);
+
+    text_png PNG;
+    //glActiveTexture(GL_TEXTURE0);
+    loadTexture1(info->app->activity->assetManager, "png/elefante.png", PNG);
+
+
+    //glBindAttribLocation(programObject, VERTEX_POS_INDX, "vPosition");
+    //glBindAttribLocation(programObject, VERTEX_NORMAL_INDX, "v_color");
+    //glBindAttribLocation(program, VERTEX_TEXCOORD0_INDX, "v_texcoord");
+
+    //glBindTexture(GL_TEXTURE_2D, texture);
+
+    glDrawElements(GL_TRIANGLES, numIndices, GL_UNSIGNED_SHORT, 0);
+
+    //glDrawArrays(GL_TRIANGLES, 0, 3);
+    eglSwapBuffers(display, surface);
+    LOGE("hola 2");
+    glDeleteBuffers(2, vboIds);
+}
+
+
 
 void Windows::loadTexture(){
     png_uint_32 width, height;
