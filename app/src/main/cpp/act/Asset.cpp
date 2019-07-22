@@ -2,6 +2,7 @@
 // Created by yanny on 22/7/2019.
 //
 
+#include <cstring>
 #include "Asset.h"
 
 const char * Asset::_externalDataPath = "";
@@ -54,3 +55,8 @@ AssetDescriptor Asset::descriptor() {
     }
     return lDescriptor;
  }
+
+
+bool Asset::operator==(const Asset& pOther) {
+    return !strcmp(_path, pOther._path);
+}

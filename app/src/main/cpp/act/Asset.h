@@ -27,6 +27,8 @@ public:
     static void setAssetManager(AAssetManager* pAssetManager);
     static void setDataPath(const char * pInternalDataPath,  const char * pExternalDataPath);
 
+    bool operator==(const Asset& pOther);
+
 private:
 
     AAsset* _asset;
