@@ -54,6 +54,7 @@ add_library( # Sets the name of the library.
         act/Windows.cpp
         act/ShadersManager.cpp
         act/FileRead.cpp
+        act/Asset.cpp
         )
 
 
