@@ -21,9 +21,9 @@ const char *  FileRead::Open(AAssetManager* mAssetManager, const char * pPath){
     mAsset = AAssetManager_open(mAssetManager, pPath, AASSET_MODE_UNKNOWN);
 
     if(mAsset!= NULL){
-        LOGW("------------COOOOOLLLLL----------");
+        //LOGW("------------COOOOOLLLLL----------");
     }else{
-        LOGW("ERRRRRRRRRRRRRRROOORRRRRRRRR");
+       // LOGW("ERRRRRRRRRRRRRRROOORRRRRRRRR");
     }
 
     off_t fileLength = AAsset_getLength(mAsset);
@@ -44,19 +44,19 @@ const char *  FileRead::Open(AAssetManager* mAssetManager, const char * pPath){
 
 void FileRead::test(AAssetManager *mAssetManager, const char * externalDataPath, const char * internalDataPath) {
 
-    LOGE("%s", externalDataPath);
-    LOGE("%s", internalDataPath);
+   // LOGE("%s", externalDataPath);
+    //LOGE("%s", internalDataPath);
 
     char aux[100];// = (char *)externalDataPath;
     strcpy(aux, externalDataPath);
-    LOGE("AUX %s", aux);
+    //LOGE("AUX %s", aux);
     char *paths3 = strcat((char *) internalDataPath, "/hello5.txt");
 
     //FILE* file = fopen("/storage/emulated/0/Android/data/com.stable.rinconada/files/hello.txt","w+");
     //FILE* file = fopen("//storage/emulated/0/txt/newfile.txt","w+");
 
     char *paths4 = strcat((char *) externalDataPath, "/storage/18EE-0616/txt/newfile.txt");
-    LOGE("AUX %s", aux);
+    //LOGE("AUX %s", aux);
     FILE *file = fopen(internalDataPath, "w+");
     if (file != NULL) {
         fputs("HOLA MUNDO 8 veces!\n", file);
@@ -64,13 +64,13 @@ void FileRead::test(AAssetManager *mAssetManager, const char * externalDataPath,
         fputs("HOLA MUNDO 10 veces!\n", file);
         fflush(file);
         fclose(file);
-        LOGE("SIP");
+        //LOGE("SIP");
     } else {
 
-        LOGE("NOP");
+        //LOGE("NOP");
     }
 
-    LOGD("QUEEEEEEEEEE");
+   //LOGD("QUEEEEEEEEEE");
     AAsset *mAsset;
     mAsset = AAssetManager_open(mAssetManager, "hola.txt", AASSET_MODE_UNKNOWN);
     off_t outStart;
@@ -86,22 +86,22 @@ void FileRead::test(AAssetManager *mAssetManager, const char * externalDataPath,
     char *dataBuffer2 = (char *) malloc(fileLength);
     memset(dataBuffer2, 0, fileLength);
     read(g, dataBuffer2, fileLength);
-    LOGE("un buffer es %s, tamaño (%d)", dataBuffer2, strlen(dataBuffer2));
+    //LOGE("un buffer es %s, tamaño (%d)", dataBuffer2, strlen(dataBuffer2));
 
     if (g) {
-        LOGE("si G");
+       // LOGE("si G");
     } else{
-        LOGE("NO G");
+        //LOGE("NO G");
     }
     FILE *fp = NULL;
 
     FILE * ffpp = fdopen(g,"rb");
     if (ffpp){
         //always enters here
-        LOGE("Bien 8000");
+        //LOGE("Bien 8000");
     } else{
         //never enters here
-        LOGE("Nada X");
+       // LOGE("Nada X");
     }
 
 
@@ -118,7 +118,7 @@ void FileRead::test(AAssetManager *mAssetManager, const char * externalDataPath,
         int nb_read = 0;
 
         FILE* out = fopen(paths8, "w+");
-        LOGE("%s", paths8);
+        //LOGE("%s", paths8);
         while ((nb_read = AAsset_read(asset, buf, BUFSIZ)) > 0)
             fwrite(buf, nb_read, 1, out);
         fclose(out);
@@ -136,11 +136,11 @@ void FileRead::test(AAssetManager *mAssetManager, const char * externalDataPath,
     char *dataBuffer = (char *) malloc(fileLength);
 
     AAsset_read(mAsset, dataBuffer, fileLength);
-    LOGE("data buffer: %s", dataBuffer);
+    //LOGE("data buffer: %s", dataBuffer);
     if (NULL == mAsset) {
-        LOGE("No asset");
+        //LOGE("No asset");
     } else{
-        LOGE("si  asset");
+       // LOGE("si  asset");
     }
 
 
@@ -154,25 +154,25 @@ void FileRead::test(AAssetManager *mAssetManager, const char * externalDataPath,
         size_t * lon;
        //read(fp,linea,lon);
        while(fgets(linea,20,fp)!=NULL){
-        LOGE("*******%s",linea);
+        //LOGE("*******%s",linea);
        }
 
 fputs("yanny esteban", fp);
-        LOGE("MAL 2200X");
+        //LOGE("MAL 2200X");
     } else{
         //never enters here
-        LOGE("BIEN 2200X");
+        //LOGE("BIEN 2200X");
     }
-LOGE ("END....");
+//LOGE ("END....");
     //FILE f = fopen("/data/data/<application name>/<file name>", "r");
 fclose(fp);
    // fclose(ffpp);.
-    LOGE("%s",internalDataPath);
+    //LOGE("%s",internalDataPath);
 }
 
 void FileRead::AA() {
 
-LOGE("%d", FileRead::s_value);
+//LOGE("%d", FileRead::s_value);
 }
 
 int FileRead::s_value=4;
@@ -195,10 +195,10 @@ int FileRead::print(const char *path) {
 
     std::stringstream ss(dataBuffer);
     std::string to;
-    LOGE("uno");
+   // LOGE("uno");
     if (dataBuffer != NULL)
     {
-        LOGE("dos");
+        //LOGE("dos");
         while (std::getline(ss, to)) {//, '\n'
             //LOGE("tres");
             char lineHeader[128];
@@ -218,31 +218,29 @@ int FileRead::print(const char *path) {
                 glm::vec3 vertex;
                 sscanf(to.c_str(), "%*s %f %f %f", &vertex.x, &vertex.y, &vertex.z );
 
-                LOGE("v-> %f", vertex.x);
-                LOGE("====%s", to.c_str());
+
 
                 //sscanf(to.c_str(), "%*c %s %s %s", &xx, &xy, &xz);
                 sscanf(to.c_str(), "%*s %s %s %s", xx, xy, xz);
 
-                LOGE("v:...(%s), (%s), (%s)", xx, xy, xz);
+
             }else if(strcmp( lineHeader, "vn" ) == 0){
-                LOGE("vn");
+
                 sscanf(to.c_str(), "%*s %s %s %s", xx, xy, xz);
 
-                LOGE("vn:...(%s), (%s), (%s)", xx, xy, xz);
+
             }else if(strcmp( lineHeader, "f" ) == 0){
-                LOGE("f");
+
                 sscanf(to.c_str(), "%*s %s %s %s", xx, xy, xz);
 
-                LOGE("f:...(%s), (%s), (%s)", xx, xy, xz);
+
             }
 
 
         }
     }
 
-    LOGE("QUE");
-    //LOGE("data buffer: %s", dataBuffer);
+
 
     free(dataBuffer);
     return 0;

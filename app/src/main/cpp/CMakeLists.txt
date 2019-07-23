@@ -9,18 +9,53 @@ add_library(
         native_app_glue
         STATIC
         ${ANDROID_NDK}/sources/android/native_app_glue/android_native_app_glue.c
+
 )
+set( lib_ndk_helper_DIR ${ANDROID_NDK}/sources/android/ndk_helper )
+add_library(
+        ndk_helper
+        STATIC
+        ${lib_ndk_helper_DIR}/JNIHelper.cpp
+        ${lib_ndk_helper_DIR}/interpolator.cpp
+        ${lib_ndk_helper_DIR}/tapCamera.cpp
+        ${lib_ndk_helper_DIR}/gestureDetector.cpp
+        ${lib_ndk_helper_DIR}/perfMonitor.cpp
+        ${lib_ndk_helper_DIR}/vecmath.cpp
+        ${lib_ndk_helper_DIR}/GLContext.cpp
+        ${lib_ndk_helper_DIR}/shader.cpp
+        ${lib_ndk_helper_DIR}/gl3stub.c
+
+)
+
+
+
+
 # Sets lib_src_DIR to the path of the target CMake project.
 set( lib_src_DIR ${ANDROID_NDK}/sources/libpng )
 target_include_directories(
         native_app_glue
         PUBLIC
         ${ANDROID_NDK}/sources/android/native_app_glue
+
         ${ANDROID_NDK}/sources/glm
        # ${lib_src_DIR}/jni
 
 )
-include_directories( ${lib_src_DIR}/jni )
+
+target_include_directories(
+        ndk_helper
+        PUBLIC
+        #${ANDROID_NDK}/sources/android/native_app_glue
+        ${ANDROID_NDK}/sources/android/ndk_helper
+
+        # ${lib_src_DIR}/jni
+
+)
+
+include_directories(
+        ${lib_src_DIR}/jni
+        ${ANDROID_NDK}/sources/android/native_app_glue
+        ${ANDROID_NDK}/sources/android/ndk_helper)
 set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -u ANativeActivity_onCreate")
 
 
@@ -96,7 +131,7 @@ target_link_libraries( # Specifies the target library.
         horse-engine
         android
         native_app_glue
-
+        ndk_helper
         EGL
         GLESv2
         libpng

@@ -8,6 +8,7 @@
 #include "FileRead.h"
 #include <png.h>
 #include <pngconf.h>
+#include <gestureDetector.h>
 
 
 void android_main(struct android_app* app) {

@@ -3,6 +3,7 @@
 //
 
 #include <cstdlib>
+#include <gestureDetector.h>
 #include <android/asset_manager.h>
 #include "ShadersManager.h"
 #include "Log.h"
@@ -142,9 +143,9 @@ const char * ShadersManager::ReadFile(AAssetManager* mAssetManager, const char *
     mAsset = AAssetManager_open(mAssetManager, pPath, AASSET_MODE_UNKNOWN);
 
     if(mAsset!= NULL){
-        LOGW("------------COOOOOLLLLL----------");
+        //LOGW("------------COOOOOLLLLL----------");
     }else{
-        LOGW("ERRRRRRRRRRRRRRROOORRRRRRRRR");
+        //LOGW("ERRRRRRRRRRRRRRROOORRRRRRRRR");
     }
 
     off_t fileLength = AAsset_getLength(mAsset);

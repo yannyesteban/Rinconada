@@ -19,24 +19,24 @@ struct text_png{
 
 };
 void callback_readPng(png_structp pStruct, png_bytep pData, png_size_t pSize) {
-    LOGW("xxx2.0 callback size:%d", pSize);
+    //LOGW("xxx2.0 callback size:%d", pSize);
     dinfo * d = ((dinfo*)png_get_io_ptr(pStruct));
-    LOGW("xxx2.1 callback size:%d", pSize);
+    //LOGW("xxx2.1 callback size:%d", pSize);
 
     int32_t readCount = AAsset_read(d->mAsset, pData, pSize);
-    LOGW("xxx2.2 callback size:%d", pSize);
+    //LOGW("xxx2.2 callback size:%d", pSize);
     if(readCount == pSize) {
-        LOGW("xxx error psize readcount %d", readCount);
+       // LOGW("xxx error psize readcount %d", readCount);
         //ERROR
     };
-    LOGW("xxx2.3 callback size:%d", pSize);
+    //LOGW("xxx2.3 callback size:%d", pSize);
 
     if (d->mAsset != NULL) {
-        LOGW("xxx2.4 callback size:%d", pSize);
+        //LOGW("xxx2.4 callback size:%d", pSize);
         //AAsset_close(d->mAsset);
         //d->mAsset = NULL;
     }
-    LOGW("xxx2.5 callback OUT size:%d", pSize);
+    //LOGW("xxx2.5 callback OUT size:%d", pSize);
 }
 
 void loadTexture1(AAssetManager* mAssetManager, const char * pPath, text_png & PNG){
@@ -46,16 +46,16 @@ void loadTexture1(AAssetManager* mAssetManager, const char * pPath, text_png & P
     mAsset = AAssetManager_open(mAssetManager, pPath, AASSET_MODE_UNKNOWN);
 
     if(mAsset!= NULL){
-        LOGW("------------COOOOOLLLLL----------");
+        //LOGW("------------COOOOOLLLLL----------");
     }else{
-        LOGW("ERRRRRRRRRRRRRRROOORRRRRRRRR");
+        //LOGW("ERRRRRRRRRRRRRRROOORRRRRRRRR");
     }
 
     off_t outStart;
 
     off_t fileLength = AAsset_getLength(mAsset);
     int descriptor = AAsset_openFileDescriptor(mAsset, &outStart, &fileLength);
-LOGW("xxx longitud: %d", fileLength);
+//LOGW("xxx longitud: %d", fileLength);
 
     GLuint texture;
     GLint format;
@@ -73,14 +73,14 @@ LOGW("xxx longitud: %d", fileLength);
     d.mAsset = mAsset;
     int32_t readCount = AAsset_read(d.mAsset, header, sizeof(header));
     if (png_sig_cmp(header, 0, 8) != 0){
-        LOGE("ERROR");
+        //LOGE("ERROR");
 
     }else{
-        LOGW("xxx 8 header bien");
+       // LOGW("xxx 8 header bien");
     }
 
 
-    LOGW("xxx  Creating required structures.");
+    //LOGW("xxx  Creating required structures.");
     pngPtr = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
     if (!pngPtr) {
         //ERROR
@@ -108,7 +108,7 @@ LOGW("xxx longitud: %d", fileLength);
     png_int_32 depth, colorType;
     png_uint_32 width, height;
 
-    LOGW("xxx hasta aqui tres3");
+    //LOGW("xxx hasta aqui tres3");
     //return;
     png_get_IHDR(pngPtr, infoPtr, &width, &height,
                  &depth, &colorType, NULL, NULL, NULL);
@@ -129,7 +129,7 @@ LOGW("xxx longitud: %d", fileLength);
         png_set_strip_16(pngPtr);
     }
 
-    LOGW("xxx hasta aqui cuatro");
+    //LOGW("xxx hasta aqui cuatro");
 
     // Indicates that image needs conversion to RGBA if needed.
     switch (colorType) {
@@ -153,7 +153,7 @@ LOGW("xxx longitud: %d", fileLength);
             break;
     }
     // Validates all transformations.
-    LOGW("xxx hasta aqui cinco");
+    //LOGW("xxx hasta aqui cinco");
     png_read_update_info(pngPtr, infoPtr);
     /******************/
     // Get row size in bytes.
@@ -171,7 +171,7 @@ LOGW("xxx longitud: %d", fileLength);
     // Pointers to each row of the image buffer. Row order is
     // inverted because different coordinate systems are used by
     // OpenGL (1st pixel is at bottom left) and PNGs (top-left).
-    LOGW("xxx hasta aqui seis");
+    //LOGW("xxx hasta aqui seis");
     rowPtrs = new png_bytep[height];
     if (!rowPtrs) {
 
@@ -180,7 +180,7 @@ LOGW("xxx longitud: %d", fileLength);
     for (int32_t i = 0; i < height; ++i) {
         rowPtrs[height - (i + 1)] = image + i * rowSize;
     }
-    LOGW("xxx hasta aqui siete");
+    //LOGW("xxx hasta aqui siete");
     // Reads image content.
     png_read_image(pngPtr, rowPtrs);
 
@@ -192,7 +192,7 @@ LOGW("xxx longitud: %d", fileLength);
     png_destroy_read_struct(&pngPtr, &infoPtr, NULL);
     delete[] rowPtrs;
 
-    LOGW("xxx hasta aqui ocho");
+    //LOGW("xxx hasta aqui ocho");
     GLenum errorResult;
     glGenTextures(1, &texture);
     glBindTexture(GL_TEXTURE_2D, texture);
@@ -201,7 +201,7 @@ LOGW("xxx longitud: %d", fileLength);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    LOGW("xxx hasta aqui nueve");
+    //LOGW("xxx hasta aqui nueve");
     // Loads image data into OpenGL.
     glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format,
                  GL_UNSIGNED_BYTE, image);
@@ -211,7 +211,7 @@ LOGW("xxx longitud: %d", fileLength);
     if (glGetError() != GL_NO_ERROR) {
         //error
     }
-    LOGW("Texture size: %d x %d", width, height);
+    //LOGW("Texture size: %d x %d", width, height);
 
 }
 

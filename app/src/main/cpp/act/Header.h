@@ -53,9 +53,9 @@ const char * leer(AAssetManager* AA, const char * pPath){
     mAssetManager = AA;
     mAsset = AAssetManager_open(mAssetManager, pPath, AASSET_MODE_UNKNOWN);
     if(mAsset!= NULL){
-        LOGW("------------COOOOOLLLLL----------");
+       // LOGW("------------COOOOOLLLLL----------");
     }else{
-        LOGW("ERRRRRRRRRRRRRRROOORRRRRRRRR");
+        //LOGW("ERRRRRRRRRRRRRRROOORRRRRRRRR");
     }
 
     off_t fileLength = AAsset_getLength(mAsset);
@@ -66,7 +66,7 @@ const char * leer(AAssetManager* AA, const char * pPath){
     AAsset_close(mAsset);
 
 
-    LOGW("%s",(const char*)dataBuffer2);
+    //LOGW("%s",(const char*)dataBuffer2);
     return dataBuffer2;
     //free(dataBuffer2);
 

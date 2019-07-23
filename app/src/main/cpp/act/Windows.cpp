@@ -4,12 +4,15 @@
 
 
 #include <cstdlib>
+#include <JNIHelper.h>
+#include<gestureDetector.h>
 #include "Log.h"
 #include "Windows.h"
 #include "Header.h"
 #include "ShadersManager.h"
 #include <png.h>
 #include "loadpng.h"
+
 
 #define VERTEX_POS_SIZE 3 // x, y and z
 #define VERTEX_NORMAL_SIZE 3 // x, y and z
@@ -60,17 +63,28 @@ void Windows::handle_cmd(android_app* app, int32_t cmd){
 }
 
 int Windows::handle_input(android_app* app, AInputEvent* event){
+
+
+
+    ndk_helper::DragDetector drag;
+    ndk_helper::GESTURE_STATE xxx = drag.Detect(event);
+    //ndk_helper::Vec2 v2;
+    //drag.GetPointer(v2);
+    //v2.Dump();
+    //LOGI("iii %d", v2.);
+    LOGII("gesture xxx %d", xxx);
+
     Windows & windows = *(Windows*)app->userData;
     if (AInputEvent_getType(event) == AINPUT_EVENT_TYPE_MOTION) {
         windows.touchX = AMotionEvent_getX(event, 0);
         windows.touchY = AMotionEvent_getY(event, 0);
-        LOGI("TOCA AQUI x %d\ty %d\n",windows.touchX, windows.touchY);
+        LOGII("TOCA AQUI x %d\ty %d\n",windows.touchX, windows.touchY);
         static GLushort mode = 0;
         if(windows.touchX>=0 && windows.touchX<200){
             if(windows.touchY>=1500 && windows.touchY<1800){
 
                 mode = (mode+1) % 3;
-                LOGI("trans Mode %d", mode);
+                //LOGI("trans Mode %d", mode);
 
 
             }
@@ -96,14 +110,14 @@ int Windows::handle_input(android_app* app, AInputEvent* event){
 
         if(windows.touchX>=0 && windows.touchX<200){
             if(windows.touchY>=0 && windows.touchY<200){
-                LOGI("trans PX px-");
+                //LOGI("trans PX px-");
                 px -= 0.05;
 
             }
         }
         if(windows.touchX>=800 && windows.touchX<1000){
             if(windows.touchY>=0 && windows.touchY<200){
-                LOGI("trans PX px+");
+               // LOGI("trans PX px+");
                 px += 0.05;
             }
         }
@@ -111,14 +125,14 @@ int Windows::handle_input(android_app* app, AInputEvent* event){
 
         if(windows.touchX>=0 && windows.touchX<200){
             if(windows.touchY>=200 && windows.touchY<400){
-                LOGI("trans PY py-");
+                //LOGI("trans PY py-");
                 py -= 0.05;
 
             }
         }
         if(windows.touchX>=800 && windows.touchX<1000){
             if(windows.touchY>=200 && windows.touchY<400){
-                LOGI("trans PY py+");
+                //LOGI("trans PY py+");
                 py += 0.05;
 
             }
@@ -127,14 +141,14 @@ int Windows::handle_input(android_app* app, AInputEvent* event){
 
         if(windows.touchX>=0 && windows.touchX<200){
             if(windows.touchY>=400 && windows.touchY<600){
-                LOGI("trans Rota x-");
+               // LOGI("trans Rota x-");
 
                 rx -= 2.0;
             }
         }
         if(windows.touchX>=800 && windows.touchX<1000){
             if(windows.touchY>=400 && windows.touchY<600){
-                LOGI("trans Rota x+");
+               //LOGI("trans Rota x+");
                 rx += 2.0;
             }
         }
@@ -239,7 +253,7 @@ bool Windows::init(){
     }
 // Store the program object
     //programObject = programObject;
-    LOGE("programa:::: %d", programObject);
+    //LOGE("programa:::: %d", programObject);
     //LOGE("BIENNNNNNNNNNNNN--------->");
     glClearColor(0.0f, 0.0f, 0.28f, 1.0f);
     return true;
@@ -330,7 +344,7 @@ int Windows::initDisplay() {
     context = eglCreateContext(display, config, NULL, attribList);
 
     if (eglMakeCurrent(display, surface, surface, context) == EGL_FALSE) {
-        LOGW("Unable to eglMakeCurrent");
+        //LOGW("Unable to eglMakeCurrent");
         return -1;
     }
 
@@ -344,7 +358,7 @@ int Windows::initDisplay() {
         aspect = (float)height/(float)width;
     }
 
-    LOGI("aspect2 %f w:%d, h:%d ", aspect, width, height);
+   // LOGI("aspect2 %f w:%d, h:%d ", aspect, width, height);
     // Initialize GL state.
     glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_FASTEST);
     glEnable(GL_CULL_FACE);
@@ -371,21 +385,21 @@ int Windows::closeDisplay() {
     display = EGL_NO_DISPLAY;
     context = EGL_NO_CONTEXT;
     surface = EGL_NO_SURFACE;
-    LOGE("BYE!!!!!!!!!!!!!!!!");
+    //LOGE("BYE!!!!!!!!!!!!!!!!");
     return 1;
 }
 
 void Windows::draw_frame() {
     // No display.
     if (display == NULL) {
-        LOGE("************************ CLOSE");
+       // LOGE("************************ CLOSE");
         return;
     }
 
     //glViewport(0, 0, 400,400);
     //glClearColor(0.1f,0.4f,0.3f, 1);
     //glClear(GL_COLOR_BUFFER_BIT);
-    LOGE("ancho = %d, alto = %d",width, height);
+    //LOGE("ancho = %d, alto = %d",width, height);
     glClearColor(100,0,0, 1);
     glClear(GL_COLOR_BUFFER_BIT);
     //init();
@@ -397,7 +411,7 @@ void Windows::draw_frame() {
     m.Program1();
     glClearColor(0.0f, 0.3f, 0.28f, 1.0f);
     Draw(m.programObject);
-    LOGE("---------P:%d--V:%d--F:%d------", m.programObject, m.vertexShader, m.fragmentShader);
+    //LOGE("---------P:%d--V:%d--F:%d------", m.programObject, m.vertexShader, m.fragmentShader);
     //eglSwapBuffers(display, surface);
     return;
 }
@@ -462,7 +476,7 @@ void Windows::Draw(GLuint programObject) {
 
     glDrawArrays(GL_TRIANGLES, 0, 6);
     eglSwapBuffers(display, surface);
-    LOGE("******YES******");
+    //LOGE("******YES******");
 }
 
 void Windows::test() {
@@ -562,7 +576,7 @@ void Windows::test2() {
 
     //glDrawArrays(GL_TRIANGLES, 0, 3);
     eglSwapBuffers(display, surface);
-    LOGE("hola 2");
+    //LOGE("hola 2");
     glDeleteBuffers(2, vboIds);
 }
 
@@ -584,7 +598,7 @@ void Windows::test3() {
     );
     // Model matrix : an identity matrix (model will be at the origin)
     glm::mat4 Model      = glm::mat4(1.0f);
-    LOGI("aspect1 %d", aspect);
+    //LOGI("aspect1 %d", aspect);
     Model = glm::scale(Model,glm::vec3(1.0f,1.0f*aspect,1.0f));
     Model = glm::rotate(Model,glm::radians(rx),glm::vec3(ex,ey,ez));
     // Our ModelViewProjection : multiplication of our 3 matrices
@@ -824,7 +838,7 @@ void Windows::test4() {
 
     //glDrawArrays(GL_TRIANGLES, 0, 3);
     eglSwapBuffers(display, surface);
-    LOGE("hola 2");
+    //LOGE("hola 2");
     glDeleteBuffers(2, vboIds);
 }
 
