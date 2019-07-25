@@ -392,7 +392,7 @@ int Windows::closeDisplay() {
 void Windows::draw_frame() {
     // No display.
     if (display == NULL) {
-       // LOGE("************************ CLOSE");
+        // LOGE("************************ CLOSE");
         return;
     }
 
@@ -400,10 +400,12 @@ void Windows::draw_frame() {
     //glClearColor(0.1f,0.4f,0.3f, 1);
     //glClear(GL_COLOR_BUFFER_BIT);
     //LOGE("ancho = %d, alto = %d",width, height);
-    glClearColor(100,0,0, 1);
+    glClearColor(100, 0, 0, 1);
     glClear(GL_COLOR_BUFFER_BIT);
     //init();
+    test1a();
 
+    return;
     ShadersManager m =  ShadersManager();
     m.mAssetManager = info->app->activity->assetManager;
     m.setVS("vs.glsl");
@@ -842,7 +844,99 @@ void Windows::test4() {
     glDeleteBuffers(2, vboIds);
 }
 
+void Windows::test1a() {
 
+    ShadersManager m =  ShadersManager();
+    m.mAssetManager = info->app->activity->assetManager;
+    m.setVS("shaders/test1a.vs");
+    m.setFS("shaders/test1a.fs");
+    m.Program1();
+
+    GLuint programObject = m.programObject;
+
+
+
+    glUseProgram(programObject);
+    glClearColor(0.0f, 0.3f, 0.28f, 1.0f);
+    Draw(m.programObject);
+    //LOGE("---------P:%d--V:%d--F:%d------", m.programObject, m.vertexShader, m.fragmentShader);
+    //eglSwapBuffers(display, surface);
+
+
+
+    GLfloat mVertices[] = {
+
+            0.5, 0.0,0.0,
+            0.5,0.5,0.0,
+
+            1.0,1.0,0.0,
+            -1.0,1.0,0.0,
+            -0.5,0.5,0.0,
+            -0.5,0.0,0.0,
+            -0.5,-0.5,0.0,
+            -1.0,-1.0,0.0,
+            1.0,-1.0,0.0,
+
+
+
+
+
+
+
+    };
+    GLfloat vVertices[] = {-0.5F,  0.5f,  0.0f,  1.0f, 0.0f,  1.0f, 0.0f, 0.0f,
+                           -0.5F, -0.5f,  0.0f,  1.0f, 0.0f,  1.0f, 1.0f, 0.0f,
+                           0.0F, -0.5f,  0.0f,  0.0f, 0.0f,  0.6f, 1.0f, 1.0f
+
+
+    };
+
+    GLushort indices[] = {0,1,2};
+    GLint numIndices=3;
+    GLint numVertices = 3;
+    GLint vtxStride = 8*sizeof(GLfloat);
+    GLuint offset = 0;
+    GLuint vboIds[2];
+// vboIds[0] – used to store vertex attribute data
+// vboIds[1] – used to store element indices
+    glGenBuffers(2, vboIds);
+    glBindBuffer(GL_ARRAY_BUFFER, vboIds[0]);
+    glBufferData(GL_ARRAY_BUFFER, vtxStride * numVertices, vVertices, GL_STATIC_DRAW);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vboIds[1]);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLushort) * numIndices, indices, GL_STATIC_DRAW);
+
+
+
+    glEnableVertexAttribArray(VERTEX_POS_INDX);
+    glEnableVertexAttribArray(VERTEX_NORMAL_INDX);
+    glEnableVertexAttribArray(VERTEX_TEXCOORD0_INDX);
+
+    glVertexAttribPointer(VERTEX_POS_INDX, VERTEX_POS_SIZE, GL_FLOAT, GL_FALSE, vtxStride, (const void*)offset);
+    offset += VERTEX_POS_SIZE * sizeof(GLfloat);
+    glVertexAttribPointer(VERTEX_NORMAL_INDX, VERTEX_NORMAL_SIZE,    GL_FLOAT, GL_FALSE, vtxStride,     (const void*)offset);
+    /**/
+    offset += VERTEX_NORMAL_SIZE * sizeof(GLfloat);
+    glVertexAttribPointer(VERTEX_TEXCOORD0_INDX,     VERTEX_TEXCOORD0_SIZE,    GL_FLOAT, GL_FALSE, vtxStride,    (const void*)offset);
+
+    text_png PNG;
+    //glActiveTexture(GL_TEXTURE0);
+    loadTexture1(info->app->activity->assetManager, "png/elefante.png", PNG);
+
+
+    //glBindAttribLocation(programObject, VERTEX_POS_INDX, "vPosition");
+    //glBindAttribLocation(programObject, VERTEX_NORMAL_INDX, "v_color");
+    //glBindAttribLocation(program, VERTEX_TEXCOORD0_INDX, "v_texcoord");
+
+    //glBindTexture(GL_TEXTURE_2D, texture);
+
+    glDrawElements(GL_TRIANGLES, numIndices, GL_UNSIGNED_SHORT, 0);
+
+    //glDrawArrays(GL_TRIANGLES, 0, 3);
+    eglSwapBuffers(display, surface);
+    //LOGE("hola 2");
+    glDeleteBuffers(2, vboIds);
+}
 
 void Windows::loadTexture(){
     png_uint_32 width, height;
