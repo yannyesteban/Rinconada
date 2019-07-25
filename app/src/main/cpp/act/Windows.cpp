@@ -396,7 +396,7 @@ void Windows::draw_frame() {
         return;
     }
 
-    //glViewport(0, 0, 400,400);
+    glViewport(0, 0, 400,400);
     //glClearColor(0.1f,0.4f,0.3f, 1);
     //glClear(GL_COLOR_BUFFER_BIT);
     //LOGE("ancho = %d, alto = %d",width, height);
@@ -456,9 +456,9 @@ void Windows::Draw(GLuint programObject) {
     //glClear(GL_COLOR_BUFFER_BIT);
     glClear(GL_COLOR_BUFFER_BIT);
     // Use the program object
-    MatrixID = glGetUniformLocation(programObject, "MVP");
+    //MatrixID = glGetUniformLocation(programObject, "MVP");
     //LOGE("yanny => %d", MatrixID );
-    glUseProgram(programObject);
+    //glUseProgram(programObject);
     //eglSwapBuffers(display, surface);
     test4();
     return;
@@ -846,6 +846,14 @@ void Windows::test4() {
 
 void Windows::test1a() {
 
+    glViewport(0, 0, width, height);
+    //glViewport(0,0,400,400);
+    // Clear the color buffer
+    //glClearColor(0.4f,0.2f,0.3f, 1);
+    //glClear(GL_COLOR_BUFFER_BIT);
+
+    glClearColor(0.0f, 0.3f, 0.28f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT);
     ShadersManager m =  ShadersManager();
     m.mAssetManager = info->app->activity->assetManager;
     m.setVS("shaders/test1a.vs");
@@ -857,43 +865,37 @@ void Windows::test1a() {
 
 
     glUseProgram(programObject);
-    glClearColor(0.0f, 0.3f, 0.28f, 1.0f);
-    Draw(m.programObject);
+
+    //Draw(m.programObject);
     //LOGE("---------P:%d--V:%d--F:%d------", m.programObject, m.vertexShader, m.fragmentShader);
     //eglSwapBuffers(display, surface);
 
 
 
-    GLfloat mVertices[] = {
+    GLfloat vVertices[] = {
+            -0.5f, 0.5f, 0.0f,
+            -0.5f, -0.5f, 0.0f,
+            0.5f, -0.5f, 0.0f,
 
-            0.5, 0.0,0.0,
-            0.5,0.5,0.0,
-
-            1.0,1.0,0.0,
-            -1.0,1.0,0.0,
-            -0.5,0.5,0.0,
-            -0.5,0.0,0.0,
-            -0.5,-0.5,0.0,
-            -1.0,-1.0,0.0,
-            1.0,-1.0,0.0,
-
-
-
-
+            0.5f, 0.5f, 0.0f
 
 
 
     };
-    GLfloat vVertices[] = {-0.5F,  0.5f,  0.0f,  1.0f, 0.0f,  1.0f, 0.0f, 0.0f,
+
+
+    GLushort  indices[] = {0,1,2,0,2,3};
+
+    GLfloat vVertices1[] = {-0.5F,  0.5f,  0.0f,  1.0f, 0.0f,  1.0f, 0.0f, 0.0f,
                            -0.5F, -0.5f,  0.0f,  1.0f, 0.0f,  1.0f, 1.0f, 0.0f,
                            0.0F, -0.5f,  0.0f,  0.0f, 0.0f,  0.6f, 1.0f, 1.0f
 
 
     };
 
-    GLushort indices[] = {0,1,2};
-    GLint numIndices=3;
-    GLint numVertices = 3;
+    GLushort indices1[] = {0,1,2};
+    GLint numIndices=6;
+    GLint numVertices = 4;
     GLint vtxStride = 8*sizeof(GLfloat);
     GLuint offset = 0;
     GLuint vboIds[2];
