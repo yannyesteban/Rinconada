@@ -12,14 +12,27 @@
 #include "ShadersManager.h"
 #include <png.h>
 #include "loadpng.h"
+#include "GLHelper.h"
 
 
 #define VERTEX_POS_SIZE 3 // x, y and z
 #define VERTEX_NORMAL_SIZE 3 // x, y and z
 #define VERTEX_TEXCOORD0_SIZE 2 // s and t
+
+
 #define VERTEX_POS_INDX 0
 #define VERTEX_NORMAL_INDX 1
 #define VERTEX_TEXCOORD0_INDX 2
+
+
+#define VERTEX_POS_INDEX 0
+#define VERTEX_COLOR_INDEX 1
+#define VERTEX_NORMAL_INDEX 2
+#define VERTEX_TEXCOORD0_INDEX 3
+#define VERTEX_TEXCOORD1_INDEX 4
+#define VERTEX_TEXCOORD2_INDEX 5
+
+
 
 GLuint MatrixID;
 GLfloat px=0;
@@ -72,13 +85,13 @@ int Windows::handle_input(android_app* app, AInputEvent* event){
     //drag.GetPointer(v2);
     //v2.Dump();
     //LOGI("iii %d", v2.);
-    LOGII("gesture xxx %d", xxx);
+    _LOGI("gesture xxx %d", xxx);
 
     Windows & windows = *(Windows*)app->userData;
     if (AInputEvent_getType(event) == AINPUT_EVENT_TYPE_MOTION) {
         windows.touchX = AMotionEvent_getX(event, 0);
         windows.touchY = AMotionEvent_getY(event, 0);
-        LOGII("TOCA AQUI x %d\ty %d\n",windows.touchX, windows.touchY);
+        _LOGI("TOCA AQUI x %d\ty %d\n",windows.touchX, windows.touchY);
         static GLushort mode = 0;
         if(windows.touchX>=0 && windows.touchX<200){
             if(windows.touchY>=1500 && windows.touchY<1800){
@@ -110,14 +123,14 @@ int Windows::handle_input(android_app* app, AInputEvent* event){
 
         if(windows.touchX>=0 && windows.touchX<200){
             if(windows.touchY>=0 && windows.touchY<200){
-                //LOGI("trans PX px-");
+                _LOGI("trans PX px-");
                 px -= 0.05;
 
             }
         }
         if(windows.touchX>=800 && windows.touchX<1000){
             if(windows.touchY>=0 && windows.touchY<200){
-               // LOGI("trans PX px+");
+               _LOGI("trans PX px+");
                 px += 0.05;
             }
         }
@@ -125,14 +138,14 @@ int Windows::handle_input(android_app* app, AInputEvent* event){
 
         if(windows.touchX>=0 && windows.touchX<200){
             if(windows.touchY>=200 && windows.touchY<400){
-                //LOGI("trans PY py-");
+                _LOGI("trans PY py-");
                 py -= 0.05;
 
             }
         }
         if(windows.touchX>=800 && windows.touchX<1000){
             if(windows.touchY>=200 && windows.touchY<400){
-                //LOGI("trans PY py+");
+                _LOGI("trans PY py+");
                 py += 0.05;
 
             }
@@ -141,14 +154,14 @@ int Windows::handle_input(android_app* app, AInputEvent* event){
 
         if(windows.touchX>=0 && windows.touchX<200){
             if(windows.touchY>=400 && windows.touchY<600){
-               // LOGI("trans Rota x-");
+               _LOGI("trans Rota x-");
 
                 rx -= 2.0;
             }
         }
         if(windows.touchX>=800 && windows.touchX<1000){
             if(windows.touchY>=400 && windows.touchY<600){
-               //LOGI("trans Rota x+");
+               _LOGI("trans Rota x+");
                 rx += 2.0;
             }
         }
@@ -846,98 +859,115 @@ void Windows::test4() {
 
 void Windows::test1a() {
 
-    glViewport(0, 0, width, height);
-    //glViewport(0,0,400,400);
-    // Clear the color buffer
-    //glClearColor(0.4f,0.2f,0.3f, 1);
-    //glClear(GL_COLOR_BUFFER_BIT);
+    text_png PNG;
+    //glActiveTexture(GL_TEXTURE0);
+    loadTexture1(info->app->activity->assetManager, "png/mario.png", PNG);
 
-    glClearColor(0.0f, 0.3f, 0.28f, 1.0f);
+
+    glViewport(0, 0, width, height);
+
+    glClearColor(0.0f, 1.0f, 0.28f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
+
+    glEnable(GL_DEPTH_TEST);
+    // Accept fragment if it closer to the camera than the former one
+    glDepthFunc(GL_LESS);
+
+    // Projection matrix : 45° Field of View, 4:3 ratio, display range : 0.1 unit <-> 100 units
+    glm::mat4 Projection = glm::perspective(glm::radians(45.0f), 4.0f / 4.0f, 0.1f, 100.0f);
+    // Camera matrix
+    glm::mat4 View       = glm::lookAt(
+            glm::vec3(0+px,0+py,5), // Camera is at (4,3,-3), in World Space
+            glm::vec3(0,0,0), // and looks at the origin
+            glm::vec3(0,1,0)  // Head is up (set to 0,-1,0 to look upside-down)
+    );
+    // Model matrix : an identity matrix (model will be at the origin)
+    glm::mat4 Model      = glm::mat4(1.0f);
+    //LOGI("aspect1 %d", aspect);
+    Model = glm::scale(Model,glm::vec3(1.0f,1.0f*aspect,1.0f));
+    Model = glm::rotate(Model,glm::radians(rx),glm::vec3(ex,ey,ez));
+    // Our ModelViewProjection : multiplication of our 3 matrices
+    glm::mat4 MVP        = Projection * View * Model ; // Remember, matrix multiplication is the other way around
+
+
+
     ShadersManager m =  ShadersManager();
     m.mAssetManager = info->app->activity->assetManager;
     m.setVS("shaders/test1a.vs");
     m.setFS("shaders/test1a.fs");
-    m.Program1();
+
+
+    std::map<GLushort , std::string> mAttrib;
+
+    mAttrib.insert(std::pair<GLushort, std::string>(VERTEX_POS_INDEX, "aPosition"));
+    mAttrib.insert(std::pair<GLushort, std::string>(VERTEX_TEXCOORD0_INDEX, "aTexture"));
+    m.Program2(mAttrib);
 
     GLuint programObject = m.programObject;
+    MatrixID = glGetUniformLocation(programObject, "MVP");
 
+    _LOGI("matrixid %d", MatrixID);
 
 
     glUseProgram(programObject);
+    glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
 
-    //Draw(m.programObject);
-    //LOGE("---------P:%d--V:%d--F:%d------", m.programObject, m.vertexShader, m.fragmentShader);
-    //eglSwapBuffers(display, surface);
+    std::map<GLushort , GLushort> defAttrib;
 
-
+    defAttrib.insert(std::pair<GLushort, GLushort>(VERTEX_POS_INDEX, VERTEX_POS_SIZE));
+    defAttrib.insert(std::pair<GLushort, GLushort>(VERTEX_TEXCOORD0_INDEX, VERTEX_TEXCOORD0_SIZE));
+    const float delX = 0.2;
+    const float del1 = 0.2;
+    const float del0 = 0.0;
 
     GLfloat vVertices[] = {
-            -0.5f, 0.5f, 0.0f,
-            -0.5f, -0.5f, 0.0f,
-            0.5f, -0.5f, 0.0f,
-
-            0.5f, 0.5f, 0.0f
-
-
-
+            0.0,  0.0,  del0, 0.0,0.0,
+            0.5,  0.0,  del0, 1.0, 0.0,
+            0.5,  0.5,  del0, 1.0,1.0,
+            0.0,  0.5,  0.0, 0.0,1.0,
     };
-
-
     GLushort  indices[] = {0,1,2,0,2,3};
+    GLHelper fig;
+    fig.setVertices(vVertices, 4, 5);
+    fig.setIndices(indices, 6);
+    fig.defAttrib(defAttrib);
 
-    GLfloat vVertices1[] = {-0.5F,  0.5f,  0.0f,  1.0f, 0.0f,  1.0f, 0.0f, 0.0f,
-                           -0.5F, -0.5f,  0.0f,  1.0f, 0.0f,  1.0f, 1.0f, 0.0f,
-                           0.0F, -0.5f,  0.0f,  0.0f, 0.0f,  0.6f, 1.0f, 1.0f
-
-
+    //LOGE("hola 2");
+    //glDeleteBuffers(2, vboIds);
+    //
+    fig.draw();
+    GLfloat dx = 0.4;
+    GLfloat dy = 0.4;
+    GLfloat vVertices2[] = {
+            0.4,  0.4,  del0, 0.0,0.0,
+            0.9,  0.4,  del0, 1.0, 0.0,
+            0.9,  0.9,  del0, 1.0,1.0,
+            0.4,  0.9,  0.0, 0.0,1.0,
     };
 
-    GLushort indices1[] = {0,1,2};
-    GLint numIndices=6;
-    GLint numVertices = 4;
-    GLint vtxStride = 8*sizeof(GLfloat);
-    GLuint offset = 0;
-    GLuint vboIds[2];
-// vboIds[0] – used to store vertex attribute data
-// vboIds[1] – used to store element indices
-    glGenBuffers(2, vboIds);
-    glBindBuffer(GL_ARRAY_BUFFER, vboIds[0]);
-    glBufferData(GL_ARRAY_BUFFER, vtxStride * numVertices, vVertices, GL_STATIC_DRAW);
 
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vboIds[1]);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLushort) * numIndices, indices, GL_STATIC_DRAW);
+    fig.setVertices(vVertices2, 4, 5);
 
-
-
-    glEnableVertexAttribArray(VERTEX_POS_INDX);
-    glEnableVertexAttribArray(VERTEX_NORMAL_INDX);
-    glEnableVertexAttribArray(VERTEX_TEXCOORD0_INDX);
-
-    glVertexAttribPointer(VERTEX_POS_INDX, VERTEX_POS_SIZE, GL_FLOAT, GL_FALSE, vtxStride, (const void*)offset);
-    offset += VERTEX_POS_SIZE * sizeof(GLfloat);
-    glVertexAttribPointer(VERTEX_NORMAL_INDX, VERTEX_NORMAL_SIZE,    GL_FLOAT, GL_FALSE, vtxStride,     (const void*)offset);
-    /**/
-    offset += VERTEX_NORMAL_SIZE * sizeof(GLfloat);
-    glVertexAttribPointer(VERTEX_TEXCOORD0_INDX,     VERTEX_TEXCOORD0_SIZE,    GL_FLOAT, GL_FALSE, vtxStride,    (const void*)offset);
-
-    text_png PNG;
+    //text_png PNG;
     //glActiveTexture(GL_TEXTURE0);
-    loadTexture1(info->app->activity->assetManager, "png/elefante.png", PNG);
+    loadTexture1(info->app->activity->assetManager, "png/mickey.png", PNG);
+
+    fig.draw();
+
+    GLfloat vVertices3[] = {
+            0.0,  0.0,  0.0, 0.0,0.0,
+            0.0,  0.0,  0.6, 1.0, 0.0,
+            0.0,  0.6,  0.6, 1.0,1.0,
+            0.0,  0.9,  0.0, 0.0,1.0,
+    };
 
 
-    //glBindAttribLocation(programObject, VERTEX_POS_INDX, "vPosition");
-    //glBindAttribLocation(programObject, VERTEX_NORMAL_INDX, "v_color");
-    //glBindAttribLocation(program, VERTEX_TEXCOORD0_INDX, "v_texcoord");
+    fig.setVertices(vVertices3, 4, 5);
 
-    //glBindTexture(GL_TEXTURE_2D, texture);
-
-    glDrawElements(GL_TRIANGLES, numIndices, GL_UNSIGNED_SHORT, 0);
-
-    //glDrawArrays(GL_TRIANGLES, 0, 3);
+    fig.draw();
     eglSwapBuffers(display, surface);
-    //LOGE("hola 2");
-    glDeleteBuffers(2, vboIds);
+
+
 }
 
 void Windows::loadTexture(){

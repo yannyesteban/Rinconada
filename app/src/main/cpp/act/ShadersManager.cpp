@@ -5,6 +5,7 @@
 #include <cstdlib>
 #include <gestureDetector.h>
 #include <android/asset_manager.h>
+
 #include "ShadersManager.h"
 #include "Log.h"
 ShadersManager::ShadersManager(){
@@ -59,8 +60,59 @@ int ShadersManager::Program1(){
     // Bind vPosition to attribute 0
     glBindAttribLocation(programObject, 0, "vPosition");
     //glBindAttribLocation(programObject, 1, "v_color");
-    //glBindAttribLocation(programObject, 2, "aTexture");
+    glBindAttribLocation(programObject, 2, "aTexture");
 
+
+/*
+    GLuint kk = glGetUniformLocation(programObject, "KKK");
+    LOGE("yanny kkk => %d", kk );
+*/
+    //glUniform4fv(location, coord);
+    // Link the program
+    glLinkProgram(programObject);
+
+
+
+    // Check the link status
+    glGetProgramiv(programObject, GL_LINK_STATUS, &linked);
+    if(!linked) {
+        GLint infoLen = 0;
+        glGetProgramiv(programObject, GL_INFO_LOG_LENGTH, &infoLen);
+        if(infoLen > 1) {
+            char* infoLog = (char*)malloc(sizeof(char) * infoLen);
+            glGetProgramInfoLog(programObject, infoLen, NULL, infoLog);
+            //esLogMessage("Error linking program:\n%s\n", infoLog);
+            free(infoLog);
+        }
+        glDeleteProgram(programObject);
+        return false;
+    }
+    //GLuint MatrixID = glGetUniformLocation(programObject, "MVP");
+    //LOGE("yanny MVP => %d", MatrixID );
+    return true;
+}
+
+
+int ShadersManager::Program2(std::map<GLushort , std::string> pAttrib){
+    if(programObject == 0) {
+        return 0;
+    }
+
+    GLint linked;
+
+
+    glAttachShader(programObject, vertexShader);
+    glAttachShader(programObject, fragmentShader);
+    // Bind vPosition to attribute 0
+    //glBindAttribLocation(programObject, 0, "vPosition");
+    //glBindAttribLocation(programObject, 1, "v_color");
+    //glBindAttribLocation(programObject, 2, "aTexture");
+    std::map<GLushort, std::string>::iterator it;
+
+    for (it = pAttrib.begin(); it != pAttrib.end(); ++it) {
+        glBindAttribLocation(programObject, it->first, it->second.c_str());
+
+    }
 
 /*
     GLuint kk = glGetUniformLocation(programObject, "KKK");
