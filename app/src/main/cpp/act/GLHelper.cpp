@@ -3,6 +3,7 @@
 //
 
 #include "GLHelper.h"
+#include "Log.h"
 
 void GLHelper::setVertices(GLfloat *pVertices, GLint numVertices, GLint vtxStride) {
     _vertices = pVertices;
@@ -51,6 +52,10 @@ void GLHelper::draw() {
     //glBindTexture(GL_TEXTURE_2D, texture);
 
     glDrawElements(GL_TRIANGLES, numIndices, GL_UNSIGNED_SHORT, 0);
+    for (it = _attrib.begin(); it != _attrib.end(); ++it) {
+
+        glDisableVertexAttribArray(it->first);
+    }
 
 
 }
@@ -60,6 +65,7 @@ void GLHelper::defAttrib(std::map<GLushort, GLushort> pAttrib) {
 }
 
 GLHelper::~GLHelper() {
+    _LOGI("borrando");
     glDeleteBuffers(2, vboIds);
 }
 
