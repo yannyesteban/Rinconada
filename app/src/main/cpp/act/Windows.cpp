@@ -297,7 +297,7 @@ bool Windows::init(){
             //glActiveTexture(GL_TEXTURE0);
             //loadTexture1(info->app->activity->assetManager, "png/elefante.png", PNG);
             //loadTexture1(info->app->activity->assetManager, "png/mickey.png", PNG);
-            Texture(info->app->activity->assetManager, "png/bugs-bunny.png");
+            Texture(info->app->activity->assetManager, "png/mario.png");
 
             break;
 
