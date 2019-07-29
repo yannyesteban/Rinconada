@@ -13,6 +13,8 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 #include <android_native_app_glue.h>
+
+#include "ShadersManager.h"
 struct WindowInfo{
 
     WindowInfo(android_app* pApp, int32_t pWidth, int32_t pHeight):
@@ -40,6 +42,7 @@ public:
     void test3();
     void test4();
     void test1a();
+    void test1b();
 
     void loadTexture();
     int32_t touchX;
@@ -55,12 +58,15 @@ private:
     int32_t width;
     int32_t height;
 
+    ShadersManager *m;
+
     int initDisplay();
     int closeDisplay();
     int ActivityLoop();
     void draw_frame();
     void Draw(GLuint programObject);
 
+    GLuint lProgram[50];
 
     static void handle_cmd(android_app* app, int32_t cmd);
     static int handle_input(android_app* app, AInputEvent* event);

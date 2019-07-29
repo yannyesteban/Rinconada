@@ -21,6 +21,7 @@ public:
 
     int read(void* pBuffer, size_t pCount);
     int read(void* pBuffer);
+    off_t getLength();
 
     AssetDescriptor descriptor();
 

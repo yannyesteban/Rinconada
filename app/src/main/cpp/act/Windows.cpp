@@ -9,26 +9,36 @@
 #include "Log.h"
 #include "Windows.h"
 #include "Header.h"
+#include "Asset.h"
 #include "ShadersManager.h"
 #include <png.h>
 #include "loadpng.h"
 #include "GLHelper.h"
 
 
-#define VERTEX_POS_SIZE 3 // x, y and z
-#define VERTEX_NORMAL_SIZE 3 // x, y and z
-#define VERTEX_TEXCOORD0_SIZE 2 // s and t
+
 
 
 #define VERTEX_POS_INDX 0
 #define VERTEX_NORMAL_INDX 1
+#define VERTEX_COLOR_INDEX 1
 #define VERTEX_TEXCOORD0_INDX 2
 
 
 #define VERTEX_POS_INDEX 0
+#define VERTEX_POS_SIZE 3 // x, y and z
+
 #define VERTEX_COLOR_INDEX 1
+#define VERTEX_COLOR_SIZE 3 // x, y and z
+
 #define VERTEX_NORMAL_INDEX 2
+#define VERTEX_NORMAL_SIZE 3 // x, y and z
+
+
 #define VERTEX_TEXCOORD0_INDEX 3
+#define VERTEX_TEXCOORD0_SIZE 2 // s and t
+
+
 #define VERTEX_TEXCOORD1_INDEX 4
 #define VERTEX_TEXCOORD2_INDEX 5
 
@@ -45,13 +55,20 @@ GLfloat ex=1.0f;
 GLfloat ey=0.0f;
 GLfloat ez=0.0f;
 GLfloat aspect=1.0f;
+bool isProgram = false;
+bool isMVP = true;
+static int _test = 2;
 
+
+GLfloat up=0.0f;
+GLfloat left=0.0f;
 Windows::Windows(WindowInfo * mInfo):
     info(mInfo){
 
 }
 
 void Windows::handle_cmd(android_app* app, int32_t cmd){
+    _LOGE("handle_cmd***");
     Windows& windows = *(Windows*)app->userData;
     switch (cmd) {
         case APP_CMD_SAVE_STATE:
@@ -59,15 +76,21 @@ void Windows::handle_cmd(android_app* app, int32_t cmd){
         case APP_CMD_INIT_WINDOW:
             // The window is being shown, get it ready.
             if (app->window != nullptr) {
+                _LOGE("APP_CMD_INIT_WINDOW***");
                 windows.initDisplay();
+
+                windows.init();
                 windows.draw_frame();
+
             }
             break;
         case APP_CMD_TERM_WINDOW:
+            _LOGE("APP_CMD_TERM_WINDOW***");
             // The window is being hidden or closed, clean it up.
             windows.closeDisplay();
             break;
         case APP_CMD_LOST_FOCUS:
+            _LOGE("APP_CMD_LOST_FOCUS***");
             windows.draw_frame();
             break;
         default:
@@ -125,6 +148,8 @@ int Windows::handle_input(android_app* app, AInputEvent* event){
             if(windows.touchY>=0 && windows.touchY<200){
                 _LOGI("trans PX px-");
                 px -= 0.05;
+                up = 0;
+                left = 0;
 
             }
         }
@@ -132,6 +157,9 @@ int Windows::handle_input(android_app* app, AInputEvent* event){
             if(windows.touchY>=0 && windows.touchY<200){
                _LOGI("trans PX px+");
                 px += 0.05;
+                up = 0;
+                left = 0;
+
             }
         }
 
@@ -140,6 +168,9 @@ int Windows::handle_input(android_app* app, AInputEvent* event){
             if(windows.touchY>=200 && windows.touchY<400){
                 _LOGI("trans PY py-");
                 py -= 0.05;
+                up = 0;
+                left = 0;
+
 
             }
         }
@@ -147,6 +178,9 @@ int Windows::handle_input(android_app* app, AInputEvent* event){
             if(windows.touchY>=200 && windows.touchY<400){
                 _LOGI("trans PY py+");
                 py += 0.05;
+                up = 0;
+                left = 0;
+
 
             }
         }
@@ -157,15 +191,45 @@ int Windows::handle_input(android_app* app, AInputEvent* event){
                _LOGI("trans Rota x-");
 
                 rx -= 2.0;
+                up = 0;
+                left = 0;
+
             }
         }
         if(windows.touchX>=800 && windows.touchX<1000){
             if(windows.touchY>=400 && windows.touchY<600){
                _LOGI("trans Rota x+");
                 rx += 2.0;
+                up = 0;
+                left = 0;
+
             }
         }
 
+
+        if(windows.touchX>=0 && windows.touchX<300){
+            if(windows.touchY>=1000 && windows.touchY<1200){
+                up +=0.02;
+            }
+        }
+
+        if(windows.touchX>=300 && windows.touchX<600){
+            if(windows.touchY>=1000 && windows.touchY<1200){
+                up -=0.02;
+            }
+        }
+
+        if(windows.touchX>=0 && windows.touchX<300){
+            if(windows.touchY>=1200 && windows.touchY<1400){
+                left -=0.02;
+            }
+        }
+
+        if(windows.touchX>=300 && windows.touchX<600){
+            if(windows.touchY>=1200 && windows.touchY<1400){
+                left +=0.02;
+            }
+        }
 
 
         return 1;
@@ -185,6 +249,7 @@ int Windows::ActivityLoop() {
 
             // Process this event.
             if (source != NULL) {
+
                 source->process(info->app, source);
             }
 
@@ -194,111 +259,69 @@ int Windows::ActivityLoop() {
                 return 0;
             }
         }
-
+        _LOGE("draw_frame***");
         // Draw the current frame
         draw_frame();
     }
     //return 0;
 }
 bool Windows::init(){
+    Asset::setAssetManager(info->app->activity->assetManager);
+    m =  new ShadersManager();
+    m->mAssetManager = info->app->activity->assetManager;
+    std::map<GLushort , std::string> mAttrib;
 
-    const char* vShaderStr = leer(info->app->activity->assetManager, "vs.glsl");
-    const char* fShaderStr = leer(info->app->activity->assetManager, "fs.glsl");
-/*
-    const char* vShaderStr =
-            "attribute vec4 vPosition; \n"
-            "void main() \n"
-            "{ \n"
-            " gl_Position = vPosition; \n"
-            "} \n";
-    const char* fShaderStr =
-            "precision mediump float; \n"
-            "void main() \n"
-            "{ \n"
-            " gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0); \n"
-            "} \n";
-*/
+    switch(_test){
+        case 1:
+            m->setVS("shaders/alpha_vs.glsl");
+            m->setFS("shaders/alpha_fs.glsl");
 
-    GLuint vertexShader;
-    GLuint fragmentShader;
-    //GLuint programObject;
-    GLint linked;
-// Load the vertex/fragment shaders
-    vertexShader = LoadShader(GL_VERTEX_SHADER, vShaderStr);
-    fragmentShader = LoadShader(GL_FRAGMENT_SHADER, fShaderStr);
-// Create the program object
-    programObject = glCreateProgram();
 
-    if(programObject == 0){
-        //LOGE("--ONE--------->");
-        return 0;
+
+
+            mAttrib.insert(std::pair<GLushort, std::string>(VERTEX_POS_INDEX, "aPosition"));
+            mAttrib.insert(std::pair<GLushort, std::string>(VERTEX_COLOR_INDEX, "aColor"));
+            break;
+        case 2:
+
+
+            m->setVS("shaders/betha_vs.glsl");
+            m->setFS("shaders/betha_fs.glsl");
+
+
+           // std::map<GLushort , std::string> mAttrib;
+
+            mAttrib.insert(std::pair<GLushort, std::string>(VERTEX_POS_INDEX, "aPosition"));
+            mAttrib.insert(std::pair<GLushort, std::string>(VERTEX_TEXCOORD0_INDEX, "aTexture"));
+            text_png PNG;
+            //glActiveTexture(GL_TEXTURE0);
+            //loadTexture1(info->app->activity->assetManager, "png/elefante.png", PNG);
+            //loadTexture1(info->app->activity->assetManager, "png/mickey.png", PNG);
+            Texture(info->app->activity->assetManager, "png/bugs-bunny.png");
+
+            break;
+
     }
-    //LOGE("--PASS--------->");
-    glAttachShader(programObject, vertexShader);
-    glAttachShader(programObject, fragmentShader);
-    // Bind vPosition to attribute 0
-    glBindAttribLocation(programObject, 0, "vPosition");
-    glBindAttribLocation(programObject, 1, "v_color");
-    // Link the program
-    glLinkProgram(programObject);
-    // Check the link status
-    glGetProgramiv(programObject, GL_LINK_STATUS, &linked);
-    if(!linked)
-    {
-        GLint infoLen = 0;
-        glGetProgramiv(programObject, GL_INFO_LOG_LENGTH, &infoLen);
-        if(infoLen > 1)
-        {
-            char* infoLog = (char*)malloc(sizeof(char) * infoLen);
-            glGetProgramInfoLog(programObject, infoLen, NULL, infoLog);
-            //esLogMessage("Error linking program:\n%s\n", infoLog);
-            //LOGE("\n\n(((%s)))\n\n", infoLog);
-            free(infoLog);
-        }else{
-            //LOGE("\n\n(==========PASÓ SIIII==========)\n\n");
 
-        }
-        glDeleteProgram(programObject);
-        //LOGE("--TWO--------->");
-        return false;
-    }else{
-       // LOGE("\n\n(==========PASÓ SIIII (2)==========)\n\n");
-    }
-// Store the program object
-    //programObject = programObject;
-    //LOGE("programa:::: %d", programObject);
-    //LOGE("BIENNNNNNNNNNNNN--------->");
-    glClearColor(0.0f, 0.0f, 0.28f, 1.0f);
+
+    m->Program2(mAttrib);
+    lProgram[0] = m->programObject;
+
+    //MatrixID = glGetUniformLocation(m->programObject, "MVP");
+    //glUseProgram( lProgram[0]);
+
+   // MatrixID = glGetUniformLocation(programObject, "MVP");
+
+
+
+
     return true;
 
-    /*
-    const char* mPath;
-    AAssetManager* mAssetManager;
-    AAsset* mAsset;
-    mPath = "vs.glsl";
-    mAssetManager = info->app->activity->assetManager;
-    mAsset = AAssetManager_open(mAssetManager, mPath, AASSET_MODE_UNKNOWN);
-    if(mAsset!= NULL){
-        LOGW("------------------OK----------");
-    }else{
-        LOGW("ERRRRRRRRRRRRRRROOORRRRRRRRR");
-    }
 
-    off_t fileLength = AAsset_getLength(mAsset);
-    char *dataBuffer2 = (char *) malloc(fileLength);
-
-    AAsset_read(mAsset, dataBuffer2, fileLength);
-//the data has been copied to dataBuffer2, so , close it
-    AAsset_close(mAsset);
-
-
-    LOGW("%s",(const char*)dataBuffer2);
-    free(dataBuffer2);
-     */
 }
 
 void Windows::end(){
-int a=1;
+
 }
 
 
@@ -315,7 +338,7 @@ void Windows::start() {
 int Windows::initDisplay() {
 // Setup OpenGL ES 2
     // http://stackoverflow.com/questions/11478957/how-do-i-create-an-opengl-es-2-context-in-a-native-activity
-
+_LOGE("initDisplay..................");
     const EGLint attribs[] = {
             EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT, //important
             EGL_BLUE_SIZE, 8,
@@ -357,7 +380,7 @@ int Windows::initDisplay() {
     context = eglCreateContext(display, config, NULL, attribList);
 
     if (eglMakeCurrent(display, surface, surface, context) == EGL_FALSE) {
-        //LOGW("Unable to eglMakeCurrent");
+        _LOGE("Unable to eglMakeCurrent");
         return -1;
     }
 
@@ -365,18 +388,20 @@ int Windows::initDisplay() {
     eglQuerySurface(display, surface, EGL_WIDTH, &width);
     eglQuerySurface(display, surface, EGL_HEIGHT, &height);
 
+    aspect = 1;
     if(height>width){
         aspect = (float)width/(float)height;
     }else{
         aspect = (float)height/(float)width;
     }
 
-   // LOGI("aspect2 %f w:%d, h:%d ", aspect, width, height);
+    _LOGE("aspect2 %f w:%d, h:%d ", aspect, width, height);
     // Initialize GL state.
     glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_FASTEST);
     glEnable(GL_CULL_FACE);
     glDisable(GL_DEPTH_TEST);
-    glViewport(100, 100, width, height);
+    //glViewport(100, 100, width, height);
+    glViewport(0, 0, width, height);
     //glViewport(100, 100, 200, 200);
 
     return 0;
@@ -405,18 +430,18 @@ int Windows::closeDisplay() {
 void Windows::draw_frame() {
     // No display.
     if (display == NULL) {
-        // LOGE("************************ CLOSE");
+        _LOGE("************************ CLOSE");
         return;
     }
 
-    glViewport(0, 0, 400,400);
+    //glViewport(0, 0, 400,400);
     //glClearColor(0.1f,0.4f,0.3f, 1);
     //glClear(GL_COLOR_BUFFER_BIT);
     //LOGE("ancho = %d, alto = %d",width, height);
-    glClearColor(100, 0, 0, 1);
-    glClear(GL_COLOR_BUFFER_BIT);
+    //glClearColor(100, 0, 0, 1);
+    //glClear(GL_COLOR_BUFFER_BIT);
     //init();
-    test1a();
+    test1b();
 
     return;
     ShadersManager m =  ShadersManager();
@@ -858,6 +883,12 @@ void Windows::test4() {
 }
 
 void Windows::test1a() {
+static int k1=0;
+if(k1>0)
+    return;
+
+k1=1;
+
 
     text_png PNG;
     //glActiveTexture(GL_TEXTURE0);
@@ -955,14 +986,119 @@ void Windows::test1a() {
     fig.draw();
 
     GLfloat vVertices3[] = {
-            0.0,  0.0,  0.0, 0.0,0.0,
-            0.0,  0.0,  0.6, 1.0, 0.0,
-            0.0,  0.6,  0.6, 1.0,1.0,
-            0.0,  0.9,  0.0, 0.0,1.0,
+            0.2,  0.2,  del0, 0.0,0.0,
+            0.7,  0.2,  del0, 1.0, 0.0,
+            0.7,  0.7,  del0, 1.0,1.0,
+            0.2,  0.7,  0.0, 0.0,1.0,
     };
 
 
     fig.setVertices(vVertices3, 4, 5);
+
+    fig.draw();
+    eglSwapBuffers(display, surface);
+
+
+}
+
+void Windows::test1b() {
+
+
+
+
+
+
+    glClearColor(0.9f, 0.8f, 0.0f, 1.0f);
+    glClearColor(0.2f, 0.6f, 0.0f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT);
+    //glEnable(GL_DEPTH_TEST);
+
+    glDepthFunc(GL_LESS);
+
+
+
+
+    if(isMVP){
+
+        MatrixID = glGetUniformLocation(lProgram[0], "MVP");
+        glUseProgram( lProgram[0]);
+
+
+
+
+
+        // Projection matrix : 45° Field of View, 4:3 ratio, display range : 0.1 unit <-> 100 units
+        glm::mat4 Projection = glm::perspective(glm::radians(45.0f), 4.0f / 4.0f, 0.1f, 100.0f);
+        // Camera matrix
+        glm::mat4 View       = glm::lookAt(
+                glm::vec3(0,0,2), // Camera is at (4,3,-3), in World Space
+                glm::vec3(0,0,0), // and looks at the origin
+                glm::vec3(0,1,0)  // Head is up (set to 0,-1,0 to look upside-down)
+        );
+        // Model matrix : an identity matrix (model will be at the origin)
+        glm::mat4 Model      = glm::mat4(1.0f);
+        //LOGI("aspect1 %d", aspect);
+        Model = glm::scale(Model,glm::vec3(1.0f,1.0f*aspect,1.0f));
+        Model = glm::rotate(Model,glm::radians(rx),glm::vec3(ex,ey,ez));
+
+        Model = glm::translate(Model, glm::vec3(0+left,0+up,0));
+        // Our ModelViewProjection : multiplication of our 3 matrices
+        glm::mat4 MVP        = Projection * View * Model ; // Remember, matrix multiplication is the other way around
+
+        glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
+    }else{
+        glUseProgram( lProgram[0]);
+    }
+
+
+
+    //glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
+
+    std::map<GLushort , GLushort> defAttrib;
+    GLHelper fig;
+    //int _test = 2;
+    GLfloat vVertices1[] = {
+            0.0,  0.0,  0.0, 0.0,1.0,0.0,
+            0.5,  0.0,  0.0, 0.0,1.0,0.0,
+            0.5,  0.5,  0.0, 0.0,1.0,0.8,
+            0.0,  0.5,  0.0, 0.0,1.0,0.5,
+    };
+    GLfloat vVertices[] = {
+            0.0,  0.0,  0.0, 0.0,0.0, 0.0,
+            0.5,  0.0,  0.0, 1.0,0.0, 0.0,
+            0.5,  0.5,  0.0, 1.0,1.0, 0.0,
+            0.0,  0.5,  0.0, 0.0,1.0, 0.0,
+    };
+    GLushort  indices1[] = {0,1,2,0,2,3};
+    GLushort  indices[] = {0,1,2,0,2,3};
+
+
+    switch(_test){
+        case 1:
+            defAttrib.insert(std::pair<GLushort, GLushort>(VERTEX_POS_INDEX, VERTEX_POS_SIZE));
+            defAttrib.insert(std::pair<GLushort, GLushort>(VERTEX_COLOR_INDEX, VERTEX_COLOR_SIZE));
+            fig.setVertices(vVertices1, 4, 6);
+            fig.setIndices(indices1, 6);
+            break;
+        case 2:
+            defAttrib.insert(std::pair<GLushort, GLushort>(VERTEX_POS_INDEX, VERTEX_POS_SIZE));
+            defAttrib.insert(std::pair<GLushort, GLushort>(VERTEX_TEXCOORD0_INDEX, VERTEX_TEXCOORD0_SIZE));
+            fig.setVertices(vVertices, 4, 6);
+            fig.setIndices(indices, 6);
+            break;
+
+
+    }
+
+
+
+
+
+    fig.defAttrib(defAttrib);
+
+
+
+
 
     fig.draw();
     eglSwapBuffers(display, surface);

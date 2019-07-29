@@ -60,3 +60,7 @@ AssetDescriptor Asset::descriptor() {
 bool Asset::operator==(const Asset& pOther) {
     return !strcmp(_path, pOther._path);
 }
+
+off_t Asset::getLength() {
+    return AAsset_getLength(_asset);
+}

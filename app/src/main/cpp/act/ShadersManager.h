@@ -13,6 +13,7 @@
 class ShadersManager {
 public:
     ShadersManager();
+    ~ShadersManager();
     GLuint Load( GLenum type, const char *shaderSrc);
     int createProgram(const char* vShaderStr, const char* fShaderStr);
     const char * ReadFile(AAssetManager* AA, const char * pPath);
@@ -22,9 +23,12 @@ public:
     GLuint vertexShader;
     GLuint fragmentShader;
 
+    GLuint ReadShader(GLenum type, const char * pPath);
+
     int setVS(const char *);
     int setFS(const char *);
     AAssetManager *mAssetManager;
+
 private:
 };
 

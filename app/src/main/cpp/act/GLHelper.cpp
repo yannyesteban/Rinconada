@@ -40,6 +40,7 @@ void GLHelper::draw() {
         glEnableVertexAttribArray(it->first);
         glVertexAttribPointer(it->first, it->second, GL_FLOAT, GL_FALSE, vtxStride, (const void*)offset);
         offset += it->second * sizeof(GLfloat);
+        _LOGE("compiling %d, %d", it->first, it->second);
 
     }
 
