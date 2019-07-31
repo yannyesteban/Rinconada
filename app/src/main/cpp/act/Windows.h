@@ -44,6 +44,8 @@ public:
     void test1a();
     void test1b();
 
+    void test1c();
+
     void loadTexture();
     int32_t touchX;
     int32_t touchY;

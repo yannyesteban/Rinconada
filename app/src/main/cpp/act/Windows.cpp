@@ -57,9 +57,9 @@ GLfloat ez=0.0f;
 GLfloat aspect=1.0f;
 bool isProgram = false;
 bool isMVP = true;
-static int _test = 2;
+static int _test = 4;
 
-
+GLint text[5];
 GLfloat up=0.0f;
 GLfloat left=0.0f;
 Windows::Windows(WindowInfo * mInfo):
@@ -271,12 +271,15 @@ bool Windows::init(){
     m->mAssetManager = info->app->activity->assetManager;
     std::map<GLushort , std::string> mAttrib;
 
+
+    text[0] = Texture(info->app->activity->assetManager, "png/mario.png");
+    text[1] = Texture(info->app->activity->assetManager, "png/elefante.png");
+    text[2] = Texture(info->app->activity->assetManager, "png/mickey.png");
+    text_png PNG;
     switch(_test){
         case 1:
             m->setVS("shaders/alpha_vs.glsl");
             m->setFS("shaders/alpha_fs.glsl");
-
-
 
 
             mAttrib.insert(std::pair<GLushort, std::string>(VERTEX_POS_INDEX, "aPosition"));
@@ -293,14 +296,42 @@ bool Windows::init(){
 
             mAttrib.insert(std::pair<GLushort, std::string>(VERTEX_POS_INDEX, "aPosition"));
             mAttrib.insert(std::pair<GLushort, std::string>(VERTEX_TEXCOORD0_INDEX, "aTexture"));
-            text_png PNG;
+
             //glActiveTexture(GL_TEXTURE0);
             //loadTexture1(info->app->activity->assetManager, "png/elefante.png", PNG);
             //loadTexture1(info->app->activity->assetManager, "png/mickey.png", PNG);
-            Texture(info->app->activity->assetManager, "png/mario.png");
+            //Texture(info->app->activity->assetManager, "png/mario.png");
+            glBindTexture(GL_TEXTURE_2D, text[0]);
 
             break;
 
+        case 3:
+
+
+            m->setVS("shaders/light_vs.glsl");
+            m->setFS("shaders/light_fs.glsl");
+
+
+            // std::map<GLushort , std::string> mAttrib;
+
+            mAttrib.insert(std::pair<GLushort, std::string>(VERTEX_POS_INDEX, "aPosition"));
+            mAttrib.insert(std::pair<GLushort, std::string>(VERTEX_TEXCOORD0_INDEX, "aTexture"));
+
+            //glActiveTexture(GL_TEXTURE0);
+            //loadTexture1(info->app->activity->assetManager, "png/elefante.png", PNG);
+            //loadTexture1(info->app->activity->assetManager, "png/mickey.png", PNG);
+            //Texture(info->app->activity->assetManager, "png/mario.png");
+            glBindTexture(GL_TEXTURE_2D, text[0]);
+
+            break;
+        case 4:
+
+            m->setVS("shaders/light2_vs.glsl");
+            m->setFS("shaders/light2_fs.glsl");
+            mAttrib.insert(std::pair<GLushort, std::string>(VERTEX_POS_INDEX, "aPosition"));
+            mAttrib.insert(std::pair<GLushort, std::string>(VERTEX_NORMAL_INDEX, "aNormal"));
+            mAttrib.insert(std::pair<GLushort, std::string>(VERTEX_TEXCOORD0_INDEX, "aTexture"));
+            glBindTexture(GL_TEXTURE_2D, text[0]);
     }
 
 
@@ -441,7 +472,7 @@ void Windows::draw_frame() {
     //glClearColor(100, 0, 0, 1);
     //glClear(GL_COLOR_BUFFER_BIT);
     //init();
-    test1b();
+    test1c();
 
     return;
     ShadersManager m =  ShadersManager();
@@ -1111,5 +1142,172 @@ void Windows::loadTexture(){
 
         return;
     }
+
+
+void Windows::test1c() {
+
+
+    static long step=0;
+    static long tn=0;
+
+
+    if(step%100==0){
+        tn = (tn+1) % 3;
+        glBindTexture(GL_TEXTURE_2D, text[tn]);
+
+
+    }
+    step++;
+
+
+
+    glClearColor(0.9f, 0.8f, 0.0f, 1.0f);
+    glClearColor(0.2f, 0.6f, 0.0f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT);
+    //glEnable(GL_DEPTH_TEST);
+
+    glDepthFunc(GL_LESS);
+
+
+
+
+    if(isMVP){
+
+        MatrixID = glGetUniformLocation(lProgram[0], "MVP");
+        glUseProgram( lProgram[0]);
+
+
+
+
+
+        // Projection matrix : 45° Field of View, 4:3 ratio, display range : 0.1 unit <-> 100 units
+        glm::mat4 Projection = glm::perspective(glm::radians(45.0f), 4.0f / 4.0f, 0.1f, 100.0f);
+        // Camera matrix
+        glm::mat4 View       = glm::lookAt(
+                glm::vec3(0,0,2), // Camera is at (4,3,-3), in World Space
+                glm::vec3(0,0,0), // and looks at the origin
+                glm::vec3(0,1,0)  // Head is up (set to 0,-1,0 to look upside-down)
+        );
+        // Model matrix : an identity matrix (model will be at the origin)
+        glm::mat4 Model      = glm::mat4(1.0f);
+        //LOGI("aspect1 %d", aspect);
+        Model = glm::scale(Model,glm::vec3(1.0f,1.0f*aspect,1.0f));
+        Model = glm::rotate(Model,glm::radians(rx),glm::vec3(ex,ey,ez));
+
+        Model = glm::translate(Model, glm::vec3(0+left,0+up,0));
+        // Our ModelViewProjection : multiplication of our 3 matrices
+        glm::mat4 MVP        = Projection * View * Model ; // Remember, matrix multiplication is the other way around
+
+        glm::mat4 ModelViewMatrix = View * Model;
+        glm::mat4 NormalMatrix = View * glm::transpose(glm::inverse(Model));
+
+
+        GLuint ModelViewMatrixID = glGetUniformLocation(lProgram[0], "ModelViewMatrix");
+        GLuint NormalMatrixID = glGetUniformLocation(lProgram[0], "NormalMatrix");
+
+        glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
+
+        glUniformMatrix4fv(ModelViewMatrixID, 1, GL_FALSE, &ModelViewMatrix[0][0]);
+        glUniformMatrix4fv(NormalMatrixID, 1, GL_FALSE, &NormalMatrix[0][0]);
+
+    }else{
+        glUseProgram( lProgram[0]);
+    }
+    std::map<GLushort , GLushort> defAttrib;
+    GLHelper fig;
+
+    int light = 1;
+    if(light*2*3 == 0){
+        GLuint MaterialAmbient = glGetUniformLocation(lProgram[0], "MaterialAmbient");
+        GLuint LightAmbient = glGetUniformLocation(lProgram[0], "LightAmbient");
+
+        // Set Red colored material
+        if (MaterialAmbient >= 0)
+        { glUniform3f(MaterialAmbient, 1.0f, 0.0f, 0.0f); }
+        // Set white light
+        if (LightAmbient >= 0)
+        { glUniform3f(LightAmbient, 1.0f, 1.0f, 1.0f); }
+
+
+        GLfloat vVertices1[] = {
+                0.0,  0.0,  0.0, 0.0,1.0,0.0,
+                0.5,  0.0,  0.0, 0.0,1.0,0.0,
+                0.5,  0.5,  0.0, 0.0,1.0,0.8,
+                0.0,  0.5,  0.0, 0.0,1.0,0.5,
+        };
+        GLfloat vVertices[] = {
+                0.0,  0.0,  0.0, 0.0,0.0, 0.0,
+                0.5,  0.0,  0.0, 1.0,0.0, 0.0,
+                0.5,  0.5,  0.0, 1.0,1.0, 0.0,
+                0.0,  0.5,  0.0, 0.0,1.0, 0.0,
+        };
+        GLushort  indices1[] = {0,1,2,0,2,3};
+        GLushort  indices[] = {0,1,2,0,2,3};
+
+
+        defAttrib.insert(std::pair<GLushort, GLushort>(VERTEX_POS_INDEX, VERTEX_POS_SIZE));
+        defAttrib.insert(std::pair<GLushort, GLushort>(VERTEX_TEXCOORD0_INDEX, VERTEX_TEXCOORD0_SIZE));
+        fig.setVertices(vVertices, 4, 6);
+        fig.setIndices(indices, 6);
+    }else if(light == 1){
+        GLuint MaterialDiffuse = glGetUniformLocation(lProgram[0], "MaterialDiffuse");
+        GLuint LightDiffuse = glGetUniformLocation(lProgram[0], "LightDiffuse");
+        GLuint LightPosition = glGetUniformLocation(lProgram[0], "LightPosition");
+
+
+        // Set Red colored diffuse material uniform
+        glm::vec3 color = glm::vec3(1.0, 0.0, 0.0);
+        if (MaterialDiffuse >= 0)
+        { glUniform3f(MaterialDiffuse,1.0, 0.0, 0.0); }
+// Set white diffuse light
+        if (LightDiffuse >= 0)
+        { glUniform3f(LightDiffuse, 1.0f, 1.0f, 1.0f); }
+// Set light position
+        glm::vec3 lightPosition(0.0, 0.0, 5.0);
+        glUniform3fv(LightPosition,1,(float*)&lightPosition);
+
+        GLfloat vVertices[] = {
+                0.0,  0.0,  0.0, 0.0,0.0, 0.0, 0, 0, 1,
+                0.5,  0.0,  0.0, 1.0,0.0, 0.0, 0, 0, 1,
+                0.5,  0.5,  0.0, 1.0,1.0, 0.0, 0, 0, 1,
+                0.0,  0.5,  0.0, 0.0,1.0, 0.0, 0, 0, 1,
+        };
+
+        GLushort  indices[] = {0,1,2,0,2,3};
+
+
+        defAttrib.insert(std::pair<GLushort, GLushort>(VERTEX_POS_INDEX, VERTEX_POS_SIZE));
+        defAttrib.insert(std::pair<GLushort, GLushort>(VERTEX_TEXCOORD0_INDEX, VERTEX_TEXCOORD0_SIZE));
+        defAttrib.insert(std::pair<GLushort, GLushort>(VERTEX_NORMAL_INDEX, VERTEX_NORMAL_SIZE));
+
+        fig.setVertices(vVertices, 4, 6);
+        fig.setIndices(indices, 6);
+    }
+
+
+
+
+    //glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
+
+
+    //int _test = 2;
+
+
+
+
+
+
+
+    fig.defAttrib(defAttrib);
+
+
+
+
+
+    fig.draw();
+    eglSwapBuffers(display, surface);
+
+
+}
 
 

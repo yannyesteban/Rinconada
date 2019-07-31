@@ -208,7 +208,7 @@ PNG_PROP readPNG(AAssetManager* mAssetManager, const char * pPath, PNG_PROP & PN
 
 }
 
-void Texture(AAssetManager* mAssetManager, const char * pPath){
+GLuint Texture(AAssetManager* mAssetManager, const char * pPath){
     GLuint texture;
     PNG_PROP PNG;
     readPNG(mAssetManager, pPath,PNG);
@@ -232,6 +232,7 @@ void Texture(AAssetManager* mAssetManager, const char * pPath){
         //error
     }
     //LOGW("Texture size: %d x %d", width, height);
+    return texture;
 }
 
 
