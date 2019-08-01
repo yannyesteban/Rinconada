@@ -1,8 +1,11 @@
 attribute vec3 aPosition;
-
+attribute vec3 aColor;
 attribute vec2 aTexture;
 attribute vec3 aNormal;
+
+varying vec3 vColor;
 varying vec2 vTexture;
+
 
 uniform mat4 MVP;
 uniform mat4 ModelViewMatrix;
@@ -29,12 +32,15 @@ void main()
         // Calculate cosine Normal and light vector
         float cosAngle = max(0.0, dot(nNormal, nLight));
         vec3 diffuse = MaterialDiffuse * LightDiffuse;
-        FinalColor = vec4(cosAngle * diffuse, 1);
+
+        vec3 color = cosAngle * diffuse;
+        FinalColor = vec4(color, 1);
+        //FinalColor = vec4(diffuse,1);
     }else{
         FinalColor = vec4(1.0,0.0,1.0,1.0);
     }
 
     gl_Position = MVP * vec4(aPosition,1.0);
-
+    vColor = aColor;
     vTexture = aTexture;
 }

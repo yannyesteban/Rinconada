@@ -52,8 +52,8 @@ GLfloat rx=0.0f;
 GLfloat ry=0.0f;
 GLfloat rz=0.0f;
 
-GLfloat ex=1.0f;
-GLfloat ey=0.0f;
+GLfloat ex=0.0f;
+GLfloat ey=1.0f;
 GLfloat ez=0.0f;
 GLfloat aspect=1.0f;
 bool isProgram = false;
@@ -340,6 +340,7 @@ bool Windows::init(){
             mAttrib.insert(std::pair<GLushort, std::string>(VERTEX_NORMAL_INDEX, "aNormal"));
 
             lAttrib.push_back({VERTEX_POS_INDEX, VERTEX_POS_SIZE, "aPosition"});
+            lAttrib.push_back({VERTEX_COLOR_INDEX, VERTEX_COLOR_SIZE, "aColor"});
             lAttrib.push_back({VERTEX_TEXCOORD0_INDEX, VERTEX_TEXCOORD0_SIZE, "aTexture"});
             lAttrib.push_back({VERTEX_NORMAL_INDEX, VERTEX_NORMAL_SIZE, "aNormal"});
 
@@ -1166,7 +1167,8 @@ void Windows::test1c() {
 
     if(step%100==0){
         tn = (tn+1) % 3;
-        glBindTexture(GL_TEXTURE_2D, text[tn]);
+        //glBindTexture(GL_TEXTURE_2D, text[tn]);
+        ry+=10;
 
 
     }
@@ -1197,7 +1199,7 @@ void Windows::test1c() {
         glm::mat4 Projection = glm::perspective(glm::radians(45.0f), 4.0f / 4.0f, 0.1f, 100.0f);
         // Camera matrix
         glm::mat4 View       = glm::lookAt(
-                glm::vec3(0,0,2), // Camera is at (4,3,-3), in World Space
+                glm::vec3(0,0,6), // Camera is at (4,3,-3), in World Space
                 glm::vec3(0,0,0), // and looks at the origin
                 glm::vec3(0,1,0)  // Head is up (set to 0,-1,0 to look upside-down)
         );
@@ -1269,29 +1271,69 @@ void Windows::test1c() {
 
 
         // Set Red colored diffuse material uniform
-        glm::vec3 color = glm::vec3(1.0, 0.0, 0.0);
-        if (MaterialDiffuse >= 0)
-        { glUniform3f(MaterialDiffuse,1.0, 0.0, 0.0); }
-// Set white diffuse light
-        if (LightDiffuse >= 0)
-        { glUniform3f(LightDiffuse, 1.0f, 1.0f, 1.0f); }
-// Set light position
-        glm::vec3 lightPosition(0.0, 0.0, -5.0);
-        glUniform3fv(LightPosition,1,(float*)&lightPosition);
+        //glm::vec3 color = glm::vec3(1.0, 0.0, 0.0);
+        if (MaterialDiffuse >= 0) {
+            glUniform3f(MaterialDiffuse,1.0, 0.8, 0.8);
+        }
+        // Set white diffuse light
+        if (LightDiffuse >= 0) {
+            glUniform3f(LightDiffuse, 1.0f, 1.0f, 1.0f);
+        }
+
+        // Set light position
+        //glm::vec3 lightPosition(0.0, 0.0, 6.0);
+        //glUniform3fv(LightPosition,1,(float*)&lightPosition);
+        if (LightPosition >= 0) {
+            glUniform3f(LightPosition, 0.0f, 0.0f,-4.0f);
+        }
        // _LOGE("compiling PINK");
+
+
+       GLfloat z = 0.0;
         GLfloat vVertices[] = {
-                0.0,  0.0,  0.0,   0.0,0.0,   0.0, 0.0, 1.0,
-                0.5,  0.0,  0.0,   1.0,0.0,   0.0, 0.0, 1.0,
-                0.5,  0.5,  0.0,   1.0,1.0,   0.0, 0.0, 1.0,
-                0.0,  0.5,  0.0,   0.0,1.0,   0.0, 0.0, 1.0,
+                0.0,  0.0,  z,   0.0,0.0,   0.0, 0.0, 1.0,
+                0.5,  0.0,  z,   1.0,0.0,   0.0, 0.0, 1.0,
+                0.5,  0.5,  z,   1.0,1.0,   0.0, 0.0, 1.0,
+                0.0,  0.5,  z,   0.0,1.0,   0.0, 0.0, 1.0,
         };
 
         GLushort  indices[] = {0,1,2,0,2,3};
 
 
+        GLfloat p = 0.5;
+        GLfloat cubo[] = {
+                -p,-p, p, 1.0, 0.0, 0.0,0.0,0.0,   0.0, 0.0, p,
+                 p,-p, p, 1.0, 0.0, 0.0,1.0,0.0,   0.0, 0.0, p,
+                 p, p, p, 1.0,0.0,0.0,1.0,1.0,   0.0, 0.0, p,
+                -p, p, p, 1.0,0.0,0.5,0.0,1.0,   0.0, 0.0, p,
 
-        fig.setVertices(vVertices, 4, 8);
-        fig.setIndices(indices, 6);
+
+                -p,-p, -p, 1.0, 0.0, 1.0,0.0,0.0,   0.0, 0.0, -p,
+                p,-p, -p, 1.0, 0.0, 0.0,1.0,0.0,   0.0, 0.0, -p,
+                p, p, -p, 1.0,0.0,0.0,1.0,1.0,   0.0, 0.0, -p,
+                -p, p, -p, 1.0,0.0,0.5,0.0,1.0,   0.0, 0.0, -p,
+        };
+        GLushort  indices2[] = {0,1,2,0,2,3,
+                                1,5,6, 6,2,1,
+
+                // back
+                                7, 6, 5,
+                                5, 4, 7,
+                // left
+                                4, 0, 3,
+                                3, 7, 4,
+                // bottom
+                                4, 5, 1,
+                                1, 0, 4,
+                // top
+                                3, 2, 6,
+                                6, 7, 3
+
+
+        };
+
+        fig.setVertices(cubo, 8, 11);
+        fig.setIndices(indices2, 6*5);
     }
 
 
