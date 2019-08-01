@@ -10,17 +10,17 @@ void main()
 
     vec4 texColor = texture2D(uTexture, vTexture);
     if(texColor.a < 0.1){
-        //discard;
+        discard;
     }
-    if(9==9){
+    if(9==8){
         gl_FragColor = texColor;
     }else{
+        //gl_FragColor = FinalColor*texColor;
         gl_FragColor = FinalColor*texColor;
-        //gl_FragColor = FinalColor;
         //gl_FragColor = vec4(1.0,0.0,0.0,1.0);
     }
 
 
-    //gl_FragColor = vec4(vTexture,1.0);
+    //gl_FragColor = texColor;
 
 }

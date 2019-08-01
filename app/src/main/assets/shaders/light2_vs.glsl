@@ -1,7 +1,7 @@
 attribute vec3 aPosition;
-attribute vec3 aNormal;
-attribute vec2 aTexture;
 
+attribute vec2 aTexture;
+attribute vec3 aNormal;
 varying vec2 vTexture;
 
 uniform mat4 MVP;
@@ -20,16 +20,20 @@ varying vec4 FinalColor;
 
 void main()
 {
+    if(2==2){
+        // Calculate normal, eye coord and light vector
+        vec3 nNormal = normalize(NormalMatrix * aNormal);
+        vec3 eyeCoord = vec3(ModelViewMatrix * vec4(aPosition, 1.0));
+        vec3 nLight = normalize (LightPosition - eyeCoord);
 
-    // Calculate normal, eye coord and light vector
-    vec3 nNormal = normalize(NormalMatrix * aNormal);
-    vec3 eyeCoord = vec3( ModelViewMatrix * vec4(aPosition, 1.0) );
-    vec3 nLight = normalize (LightPosition - eyeCoord);
+        // Calculate cosine Normal and light vector
+        float cosAngle = max(0.0, dot(nNormal, nLight));
+        vec3 diffuse = MaterialDiffuse * LightDiffuse;
+        FinalColor = vec4(cosAngle * diffuse, 1);
+    }else{
+        FinalColor = vec4(1.0,0.0,1.0,1.0);
+    }
 
-    // Calculate cosine Normal and light vector
-    float cosAngle = max( 0.0, dot( nNormal, nLight ));
-    vec3 diffuse = MaterialDiffuse * LightDiffuse;
-    FinalColor = vec4(cosAngle * diffuse, 1);
     gl_Position = MVP * vec4(aPosition,1.0);
 
     vTexture = aTexture;

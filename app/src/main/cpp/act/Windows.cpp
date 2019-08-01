@@ -12,6 +12,7 @@
 #include "Asset.h"
 #include "ShadersManager.h"
 #include <png.h>
+#include <list>
 #include "loadpng.h"
 #include "GLHelper.h"
 
@@ -31,7 +32,7 @@
 #define VERTEX_COLOR_INDEX 1
 #define VERTEX_COLOR_SIZE 3 // x, y and z
 
-#define VERTEX_NORMAL_INDEX 2
+#define VERTEX_NORMAL_INDEX 8
 #define VERTEX_NORMAL_SIZE 3 // x, y and z
 
 
@@ -62,6 +63,8 @@ static int _test = 4;
 GLint text[5];
 GLfloat up=0.0f;
 GLfloat left=0.0f;
+
+std::list<GLAttrib> lAttrib;
 Windows::Windows(WindowInfo * mInfo):
     info(mInfo){
 
@@ -266,10 +269,14 @@ int Windows::ActivityLoop() {
     //return 0;
 }
 bool Windows::init(){
+
+
+
+
     Asset::setAssetManager(info->app->activity->assetManager);
     m =  new ShadersManager();
     m->mAssetManager = info->app->activity->assetManager;
-    std::map<GLushort , std::string> mAttrib;
+    std::unordered_map<GLushort , std::string> mAttrib;
 
 
     text[0] = Texture(info->app->activity->assetManager, "png/mario.png");
@@ -325,17 +332,23 @@ bool Windows::init(){
 
             break;
         case 4:
-
+            _LOGE("compiling LIGHT2");
             m->setVS("shaders/light2_vs.glsl");
             m->setFS("shaders/light2_fs.glsl");
             mAttrib.insert(std::pair<GLushort, std::string>(VERTEX_POS_INDEX, "aPosition"));
-            mAttrib.insert(std::pair<GLushort, std::string>(VERTEX_NORMAL_INDEX, "aNormal"));
             mAttrib.insert(std::pair<GLushort, std::string>(VERTEX_TEXCOORD0_INDEX, "aTexture"));
+            mAttrib.insert(std::pair<GLushort, std::string>(VERTEX_NORMAL_INDEX, "aNormal"));
+
+            lAttrib.push_back({VERTEX_POS_INDEX, VERTEX_POS_SIZE, "aPosition"});
+            lAttrib.push_back({VERTEX_TEXCOORD0_INDEX, VERTEX_TEXCOORD0_SIZE, "aTexture"});
+            lAttrib.push_back({VERTEX_NORMAL_INDEX, VERTEX_NORMAL_SIZE, "aNormal"});
+
+
             glBindTexture(GL_TEXTURE_2D, text[0]);
     }
 
 
-    m->Program2(mAttrib);
+    m->Program3(lAttrib);
     lProgram[0] = m->programObject;
 
     //MatrixID = glGetUniformLocation(m->programObject, "MVP");
@@ -959,7 +972,7 @@ k1=1;
     m.setFS("shaders/test1a.fs");
 
 
-    std::map<GLushort , std::string> mAttrib;
+    std::unordered_map<GLushort , std::string> mAttrib;
 
     mAttrib.insert(std::pair<GLushort, std::string>(VERTEX_POS_INDEX, "aPosition"));
     mAttrib.insert(std::pair<GLushort, std::string>(VERTEX_TEXCOORD0_INDEX, "aTexture"));
@@ -974,7 +987,7 @@ k1=1;
     glUseProgram(programObject);
     glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
 
-    std::map<GLushort , GLushort> defAttrib;
+    std::unordered_map<GLushort , GLushort> defAttrib;
 
     defAttrib.insert(std::pair<GLushort, GLushort>(VERTEX_POS_INDEX, VERTEX_POS_SIZE));
     defAttrib.insert(std::pair<GLushort, GLushort>(VERTEX_TEXCOORD0_INDEX, VERTEX_TEXCOORD0_SIZE));
@@ -1085,7 +1098,7 @@ void Windows::test1b() {
 
     //glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
 
-    std::map<GLushort , GLushort> defAttrib;
+    std::unordered_map<GLushort , GLushort> defAttrib;
     GLHelper fig;
     //int _test = 2;
     GLfloat vVertices1[] = {
@@ -1146,7 +1159,7 @@ void Windows::loadTexture(){
 
 void Windows::test1c() {
 
-
+   // _LOGE("compiling  test1c PINK");
     static long step=0;
     static long tn=0;
 
@@ -1213,7 +1226,7 @@ void Windows::test1c() {
     }else{
         glUseProgram( lProgram[0]);
     }
-    std::map<GLushort , GLushort> defAttrib;
+    std::unordered_map<GLushort , GLushort> defAttrib;
     GLHelper fig;
 
     int light = 1;
@@ -1263,48 +1276,28 @@ void Windows::test1c() {
         if (LightDiffuse >= 0)
         { glUniform3f(LightDiffuse, 1.0f, 1.0f, 1.0f); }
 // Set light position
-        glm::vec3 lightPosition(0.0, 0.0, 5.0);
+        glm::vec3 lightPosition(0.0, 0.0, -5.0);
         glUniform3fv(LightPosition,1,(float*)&lightPosition);
-
+       // _LOGE("compiling PINK");
         GLfloat vVertices[] = {
-                0.0,  0.0,  0.0, 0.0,0.0, 0.0, 0, 0, 1,
-                0.5,  0.0,  0.0, 1.0,0.0, 0.0, 0, 0, 1,
-                0.5,  0.5,  0.0, 1.0,1.0, 0.0, 0, 0, 1,
-                0.0,  0.5,  0.0, 0.0,1.0, 0.0, 0, 0, 1,
+                0.0,  0.0,  0.0,   0.0,0.0,   0.0, 0.0, 1.0,
+                0.5,  0.0,  0.0,   1.0,0.0,   0.0, 0.0, 1.0,
+                0.5,  0.5,  0.0,   1.0,1.0,   0.0, 0.0, 1.0,
+                0.0,  0.5,  0.0,   0.0,1.0,   0.0, 0.0, 1.0,
         };
 
         GLushort  indices[] = {0,1,2,0,2,3};
 
 
-        defAttrib.insert(std::pair<GLushort, GLushort>(VERTEX_POS_INDEX, VERTEX_POS_SIZE));
-        defAttrib.insert(std::pair<GLushort, GLushort>(VERTEX_TEXCOORD0_INDEX, VERTEX_TEXCOORD0_SIZE));
-        defAttrib.insert(std::pair<GLushort, GLushort>(VERTEX_NORMAL_INDEX, VERTEX_NORMAL_SIZE));
 
-        fig.setVertices(vVertices, 4, 6);
+        fig.setVertices(vVertices, 4, 8);
         fig.setIndices(indices, 6);
     }
 
 
+    fig.defAttrib2(lAttrib);
 
-
-    //glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
-
-
-    //int _test = 2;
-
-
-
-
-
-
-
-    fig.defAttrib(defAttrib);
-
-
-
-
-
-    fig.draw();
+    fig.draw2();
     eglSwapBuffers(display, surface);
 
 

@@ -13,7 +13,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 #include <android_native_app_glue.h>
-
+#include "types.h";
 #include "ShadersManager.h"
 struct WindowInfo{
 

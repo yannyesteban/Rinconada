@@ -5,10 +5,13 @@
 #ifndef RINCONADA_SHADERSMANAGER_H
 #define RINCONADA_SHADERSMANAGER_H
 #include <map>
+#include <unordered_map>
 #include <EGL/egl.h>
 #include <GLES/gl.h>
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
+#include <list>
+#include "types.h"
 
 class ShadersManager {
 public:
@@ -18,7 +21,8 @@ public:
     int createProgram(const char* vShaderStr, const char* fShaderStr);
     const char * ReadFile(AAssetManager* AA, const char * pPath);
     int Program1();
-    int Program2(std::map<GLushort, std::string> pAttrib);
+    int Program2(std::unordered_map<GLushort, std::string> pAttrib);
+    int Program3(std::list<GLAttrib> pAttrib);
     GLuint programObject;
     GLuint vertexShader;
     GLuint fragmentShader;

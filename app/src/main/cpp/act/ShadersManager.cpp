@@ -96,8 +96,8 @@ int ShadersManager::Program1(){
 }
 
 
-int ShadersManager::Program2(std::map<GLushort , std::string> pAttrib){
-    _LOGE("Program2");
+int ShadersManager::Program2(std::unordered_map<GLushort , std::string> pAttrib){
+    _LOGE("Program2 dos");
     if(programObject == 0) {
         return 0;
     }
@@ -107,7 +107,7 @@ int ShadersManager::Program2(std::map<GLushort , std::string> pAttrib){
     glAttachShader(programObject, vertexShader);
    // _LOGE("shader %s %s", programObject, vertexShader);
     glAttachShader(programObject, fragmentShader);
-    std::map<GLushort, std::string>::iterator it;
+    std::unordered_map<GLushort, std::string>::iterator it;
     _LOGE("yanny Bien 2");
     for (it = pAttrib.begin(); it != pAttrib.end(); ++it) {
         glBindAttribLocation(programObject, it->first, it->second.c_str());
@@ -117,6 +117,51 @@ int ShadersManager::Program2(std::map<GLushort , std::string> pAttrib){
 
     glLinkProgram(programObject);
 int n;
+    glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &n);
+    _LOGE("compiling GL_MAX_VERTEX_ATTRIBS %d", n);
+    // Check the link status
+    glGetProgramiv(programObject, GL_LINK_STATUS, &linked);
+    if(!linked) {
+        _LOGE("YANNY ERROR ONE");
+        GLint infoLen = 0;
+        glGetProgramiv(programObject, GL_INFO_LOG_LENGTH, &infoLen);
+        if(infoLen > 1) {
+            char* infoLog = (char*)malloc(sizeof(char) * infoLen);
+            glGetProgramInfoLog(programObject, infoLen, NULL, infoLog);
+            //esLogMessage("Error linking program:\n%s\n", infoLog);
+            free(infoLog);
+        }
+        glDeleteProgram(programObject);
+        return false;
+    }
+    //GLuint MatrixID = glGetUniformLocation(programObject, "MVP");
+    //LOGE("yanny MVP => %d", MatrixID );
+
+    _LOGE("yanny Bien");
+    return true;
+}
+
+int ShadersManager::Program3(std::list<GLAttrib> pAttrib){
+    _LOGE("Program2 dos");
+    if(programObject == 0) {
+        return 0;
+    }
+
+    GLint linked;
+
+    glAttachShader(programObject, vertexShader);
+    // _LOGE("shader %s %s", programObject, vertexShader);
+    glAttachShader(programObject, fragmentShader);
+    std::list<GLAttrib>::iterator it;
+    _LOGE("yanny Bien 2");
+    for (it = pAttrib.begin(); it != pAttrib.end(); ++it) {
+        glBindAttribLocation(programObject, it->index, it->name.c_str());
+        _LOGE("YANNY glBindAttribLocation %d, %s",it->index, it->name.c_str());
+
+    }
+
+    glLinkProgram(programObject);
+    int n;
     glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &n);
     _LOGE("compiling GL_MAX_VERTEX_ATTRIBS %d", n);
     // Check the link status
