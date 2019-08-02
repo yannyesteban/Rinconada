@@ -182,7 +182,7 @@ void FileRead::setAssetManager(AAssetManager *mmAssetManager) {
 }
 
 
-int FileRead::print(const char *path) {
+int FileRead::print(const char *path, GMMesh* mesh) {
     AAsset *mAsset;
     mAsset = AAssetManager_open(_assetManager, path, AASSET_MODE_UNKNOWN);
     off_t outStart;
@@ -195,16 +195,16 @@ int FileRead::print(const char *path) {
 
     std::stringstream ss(dataBuffer);
     std::string to;
-   // LOGE("uno");
+    //_LOGE("FILEREAD uno");
     if (dataBuffer != NULL)
     {
-        //LOGE("dos");
+        //_LOGE("FILEREAD dos");
         while (std::getline(ss, to)) {//, '\n'
             //LOGE("tres");
             char lineHeader[128];
             // Lee la primera palabra de la línea
 
-            //LOGE(".%s", to.c_str());
+            //_LOGE("FILEREAD .%s", to.c_str());
             //std::cout << to.c_str() << std::endl;
             //cout << "x: " << to << endl;
 
@@ -223,6 +223,9 @@ int FileRead::print(const char *path) {
                 //sscanf(to.c_str(), "%*c %s %s %s", &xx, &xy, &xz);
                 sscanf(to.c_str(), "%*s %s %s %s", xx, xy, xz);
 
+                mesh->v.push_back(vertex);
+
+                //_LOGE("FILEREAD TORUS %f %f %f", vertex.x, vertex.y, vertex.z);
 
             }else if(strcmp( lineHeader, "vn" ) == 0){
 
@@ -239,6 +242,10 @@ int FileRead::print(const char *path) {
 
         }
     }
+
+
+
+
 
 
 

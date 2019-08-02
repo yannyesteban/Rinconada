@@ -8,7 +8,16 @@
 #include <iostream>
 #include <string>
 #include <android/asset_manager.h>
+#include <glm/vec3.hpp>
+#include <list>
 #include "Log.h"
+
+struct GMMesh{
+
+    std::list<glm::vec3> v;
+    std::list<glm::vec3> n;
+
+};
 
 class FileRead {
 
@@ -33,7 +42,7 @@ public:
 
 
 
-    int print(const char * path);
+    int print(const char * path, GMMesh* mesh);
 private:
     static AAssetManager * _assetManager;
 

@@ -15,9 +15,7 @@
 #include <list>
 #include "loadpng.h"
 #include "GLHelper.h"
-
-
-
+#include "FileRead.h"
 
 
 #define VERTEX_POS_INDX 0
@@ -58,13 +56,16 @@ GLfloat ez=0.0f;
 GLfloat aspect=1.0f;
 bool isProgram = false;
 bool isMVP = true;
-static int _test = 4;
+static int _test = 5;
 
 GLint text[5];
 GLfloat up=0.0f;
 GLfloat left=0.0f;
 
 std::list<GLAttrib> lAttrib;
+
+GMMesh mesh;
+
 Windows::Windows(WindowInfo * mInfo):
     info(mInfo){
 
@@ -272,6 +273,15 @@ bool Windows::init(){
 
 
 
+    FileRead F;
+    F.print("obj/torus2.obj", &mesh);
+
+    std::list<glm::vec3>::iterator it;
+    for (it = mesh.v.begin(); it != mesh.v.end(); it++){
+        _LOGE("FILEREAD T*** %f", it->x);
+    }
+
+
 
     Asset::setAssetManager(info->app->activity->assetManager);
     m =  new ShadersManager();
@@ -343,6 +353,22 @@ bool Windows::init(){
             lAttrib.push_back({VERTEX_COLOR_INDEX, VERTEX_COLOR_SIZE, "aColor"});
             lAttrib.push_back({VERTEX_TEXCOORD0_INDEX, VERTEX_TEXCOORD0_SIZE, "aTexture"});
             lAttrib.push_back({VERTEX_NORMAL_INDEX, VERTEX_NORMAL_SIZE, "aNormal"});
+
+
+            glBindTexture(GL_TEXTURE_2D, text[0]);
+            break;
+        case 5:
+            _LOGE("compiling LIGHT5");
+            m->setVS("shaders/torus_vs.glsl");
+            m->setFS("shaders/torus_fs.glsl");
+            mAttrib.insert(std::pair<GLushort, std::string>(VERTEX_POS_INDEX, "aPosition"));
+            mAttrib.insert(std::pair<GLushort, std::string>(VERTEX_TEXCOORD0_INDEX, "aTexture"));
+            mAttrib.insert(std::pair<GLushort, std::string>(VERTEX_NORMAL_INDEX, "aNormal"));
+
+            lAttrib.push_back({VERTEX_POS_INDEX, VERTEX_POS_SIZE, "aPosition"});
+            //lAttrib.push_back({VERTEX_COLOR_INDEX, VERTEX_COLOR_SIZE, "aColor"});
+            //lAttrib.push_back({VERTEX_TEXCOORD0_INDEX, VERTEX_TEXCOORD0_SIZE, "aTexture"});
+            //lAttrib.push_back({VERTEX_NORMAL_INDEX, VERTEX_NORMAL_SIZE, "aNormal"});
 
 
             glBindTexture(GL_TEXTURE_2D, text[0]);
@@ -486,7 +512,7 @@ void Windows::draw_frame() {
     //glClearColor(100, 0, 0, 1);
     //glClear(GL_COLOR_BUFFER_BIT);
     //init();
-    test1c();
+    test1d();
 
     return;
     ShadersManager m =  ShadersManager();
@@ -1332,6 +1358,198 @@ void Windows::test1c() {
 
         };
 
+        fig.setVertices(cubo, 8, 11);
+        fig.setIndices(indices2, 6*5);
+    }
+
+
+    fig.defAttrib2(lAttrib);
+
+    fig.draw2();
+    eglSwapBuffers(display, surface);
+
+
+}
+
+void Windows::test1d() {
+
+    // _LOGE("compiling  test1c PINK");
+    static long step=0;
+    static long tn=0;
+
+
+    if(step%100==0){
+        tn = (tn+1) % 3;
+        //glBindTexture(GL_TEXTURE_2D, text[tn]);
+        ry+=10;
+
+
+    }
+    step++;
+
+
+
+    glClearColor(0.9f, 0.8f, 0.0f, 1.0f);
+    glClearColor(0.2f, 0.6f, 0.0f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT);
+    //glEnable(GL_DEPTH_TEST);
+
+    glDepthFunc(GL_LESS);
+
+
+
+
+    if(isMVP){
+
+        MatrixID = glGetUniformLocation(lProgram[0], "MVP");
+        glUseProgram( lProgram[0]);
+
+
+
+
+
+        // Projection matrix : 45° Field of View, 4:3 ratio, display range : 0.1 unit <-> 100 units
+        glm::mat4 Projection = glm::perspective(glm::radians(45.0f), 4.0f / 4.0f, 0.1f, 100.0f);
+        // Camera matrix
+        glm::mat4 View       = glm::lookAt(
+                glm::vec3(0,0,6), // Camera is at (4,3,-3), in World Space
+                glm::vec3(0,0,0), // and looks at the origin
+                glm::vec3(0,1,0)  // Head is up (set to 0,-1,0 to look upside-down)
+        );
+        // Model matrix : an identity matrix (model will be at the origin)
+        glm::mat4 Model      = glm::mat4(1.0f);
+        //LOGI("aspect1 %d", aspect);
+        Model = glm::scale(Model,glm::vec3(1.0f,1.0f*aspect,1.0f));
+        Model = glm::rotate(Model,glm::radians(rx),glm::vec3(ex,ey,ez));
+
+        Model = glm::translate(Model, glm::vec3(0+left,0+up,0));
+        // Our ModelViewProjection : multiplication of our 3 matrices
+        glm::mat4 MVP        = Projection * View * Model ; // Remember, matrix multiplication is the other way around
+
+        glm::mat4 ModelViewMatrix = View * Model;
+        glm::mat4 NormalMatrix = View * glm::transpose(glm::inverse(Model));
+
+
+        //GLuint ModelViewMatrixID = glGetUniformLocation(lProgram[0], "ModelViewMatrix");
+        //GLuint NormalMatrixID = glGetUniformLocation(lProgram[0], "NormalMatrix");
+
+        glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
+
+        //glUniformMatrix4fv(ModelViewMatrixID, 1, GL_FALSE, &ModelViewMatrix[0][0]);
+        //glUniformMatrix4fv(NormalMatrixID, 1, GL_FALSE, &NormalMatrix[0][0]);
+
+    }else{
+        glUseProgram( lProgram[0]);
+    }
+    std::unordered_map<GLushort , GLushort> defAttrib;
+    GLHelper fig;
+
+    int light = 1;
+    if(light*2*3 == 0){
+        GLuint MaterialAmbient = glGetUniformLocation(lProgram[0], "MaterialAmbient");
+        GLuint LightAmbient = glGetUniformLocation(lProgram[0], "LightAmbient");
+
+        // Set Red colored material
+        if (MaterialAmbient >= 0)
+        { glUniform3f(MaterialAmbient, 1.0f, 0.0f, 0.0f); }
+        // Set white light
+        if (LightAmbient >= 0)
+        { glUniform3f(LightAmbient, 1.0f, 1.0f, 1.0f); }
+
+
+        GLfloat vVertices1[] = {
+                0.0,  0.0,  0.0, 0.0,1.0,0.0,
+                0.5,  0.0,  0.0, 0.0,1.0,0.0,
+                0.5,  0.5,  0.0, 0.0,1.0,0.8,
+                0.0,  0.5,  0.0, 0.0,1.0,0.5,
+        };
+        GLfloat vVertices[] = {
+                0.0,  0.0,  0.0, 0.0,0.0, 0.0,
+                0.5,  0.0,  0.0, 1.0,0.0, 0.0,
+                0.5,  0.5,  0.0, 1.0,1.0, 0.0,
+                0.0,  0.5,  0.0, 0.0,1.0, 0.0,
+        };
+        GLushort  indices1[] = {0,1,2,0,2,3};
+        GLushort  indices[] = {0,1,2,0,2,3};
+
+
+        defAttrib.insert(std::pair<GLushort, GLushort>(VERTEX_POS_INDEX, VERTEX_POS_SIZE));
+        defAttrib.insert(std::pair<GLushort, GLushort>(VERTEX_TEXCOORD0_INDEX, VERTEX_TEXCOORD0_SIZE));
+        fig.setVertices(vVertices, 4, 6);
+        fig.setIndices(indices, 6);
+    }else if(light == 1){
+        GLuint MaterialDiffuse = glGetUniformLocation(lProgram[0], "MaterialDiffuse");
+        GLuint LightDiffuse = glGetUniformLocation(lProgram[0], "LightDiffuse");
+        GLuint LightPosition = glGetUniformLocation(lProgram[0], "LightPosition");
+
+
+        // Set Red colored diffuse material uniform
+        //glm::vec3 color = glm::vec3(1.0, 0.0, 0.0);
+        if (MaterialDiffuse >= 0) {
+            glUniform3f(MaterialDiffuse,1.0, 0.8, 0.8);
+        }
+        // Set white diffuse light
+        if (LightDiffuse >= 0) {
+            glUniform3f(LightDiffuse, 1.0f, 1.0f, 1.0f);
+        }
+
+        // Set light position
+        //glm::vec3 lightPosition(0.0, 0.0, 6.0);
+        //glUniform3fv(LightPosition,1,(float*)&lightPosition);
+        if (LightPosition >= 0) {
+            glUniform3f(LightPosition, 0.0f, 0.0f,-4.0f);
+        }
+        // _LOGE("compiling PINK");
+
+
+        GLfloat z = 0.0;
+        GLfloat vVertices[] = {
+                0.0,  0.0,  z,   0.0,0.0,   0.0, 0.0, 1.0,
+                0.5,  0.0,  z,   1.0,0.0,   0.0, 0.0, 1.0,
+                0.5,  0.5,  z,   1.0,1.0,   0.0, 0.0, 1.0,
+                0.0,  0.5,  z,   0.0,1.0,   0.0, 0.0, 1.0,
+        };
+
+        GLushort  indices[] = {0,1,2,0,2,3};
+
+
+        GLfloat p = 0.5;
+        GLfloat cubo[] = {
+                -p,-p, p, 1.0, 0.0, 0.0,0.0,0.0,   0.0, 0.0, p,
+                p,-p, p, 1.0, 0.0, 0.0,1.0,0.0,   0.0, 0.0, p,
+                p, p, p, 1.0,0.0,0.0,1.0,1.0,   0.0, 0.0, p,
+                -p, p, p, 1.0,0.0,0.5,0.0,1.0,   0.0, 0.0, p,
+
+
+                -p,-p, -p, 1.0, 0.0, 1.0,0.0,0.0,   0.0, 0.0, -p,
+                p,-p, -p, 1.0, 0.0, 0.0,1.0,0.0,   0.0, 0.0, -p,
+                p, p, -p, 1.0,0.0,0.0,1.0,1.0,   0.0, 0.0, -p,
+                -p, p, -p, 1.0,0.0,0.5,0.0,1.0,   0.0, 0.0, -p,
+        };
+        GLushort  indices2[] = {0,1,2,0,2,3,
+                                1,5,6, 6,2,1,
+
+                // back
+                                7, 6, 5,
+                                5, 4, 7,
+                // left
+                                4, 0, 3,
+                                3, 7, 4,
+                // bottom
+                                4, 5, 1,
+                                1, 0, 4,
+                // top
+                                3, 2, 6,
+                                6, 7, 3
+
+
+        };
+
+        //GLfloat toro[] = &mesh.v[0];
+        _LOGE("longitud %d", mesh.v.size());
+
+        std::list<glm::vec3>::iterator it;
+        it = mesh.v.begin();
         fig.setVertices(cubo, 8, 11);
         fig.setIndices(indices2, 6*5);
     }

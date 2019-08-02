@@ -23,6 +23,7 @@ public:
     void defAttrib2(std::list<GLAttrib>);
     void draw();
     void draw2();
+    void draw3();
     ~GLHelper();
 private:
     GLfloat* _vertices;
