@@ -9,13 +9,14 @@
 #include <string>
 #include <android/asset_manager.h>
 #include <glm/vec3.hpp>
-#include <list>
+
+#include <vector>
 #include "Log.h"
 
 struct GMMesh{
 
-    std::list<glm::vec3> v;
-    std::list<glm::vec3> n;
+    std::vector<glm::vec3> v;
+    std::vector<glm::vec3> n;
 
 };
 

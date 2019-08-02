@@ -271,15 +271,11 @@ int Windows::ActivityLoop() {
 }
 bool Windows::init(){
 
-
+//https://gitlab.com/wikibooks-opengl/modern-tutorials
 
     FileRead F;
     F.print("obj/torus2.obj", &mesh);
 
-    std::list<glm::vec3>::iterator it;
-    for (it = mesh.v.begin(); it != mesh.v.end(); it++){
-        _LOGE("FILEREAD T*** %f", it->x);
-    }
 
 
 
