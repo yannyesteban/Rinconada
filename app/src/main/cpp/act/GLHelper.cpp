@@ -18,7 +18,12 @@ void GLHelper::setVertices(std::vector<glm::vec3> pVertices, GLint numVertices, 
     _vtxStride = vtxStride;
 
 }
+void GLHelper::setVertices(std::vector<GMv8> pVertices, GLint numVertices, GLint vtxStride) {
+    _vertices3 = pVertices;
+    _numVertices = numVertices;
+    _vtxStride = vtxStride;
 
+}
 void GLHelper::setIndices(GLushort *pIndices, GLint numIndices) {
     _indices = pIndices;
     _numIndices = numIndices;
@@ -205,17 +210,27 @@ void GLHelper::draw4() {
 /*
      numIndices = 6;
      numVertices = 4;
-     vtxStride = (3)*sizeof(GLfloat);
-*/
+     vtxStride = (6)*sizeof(GLfloat);
+    */
     GLfloat v[] ={
-            0.0, 0.0, 0.0,
-            0.5, 0.0, 0.0,
-            0.5, 0.5, 0.0,
-            0.0, 0.5, 0.0,
+            0.0, 0.0, 0.0,1.0,0.0,0.0,
+            0.5, 0.0, 0.0,1.0,0.0,0.0,
+            0.5, 0.5, 0.0,1.0,0.0,1.0,
+            0.0, 0.5, 0.0,1.0,1.0,0.0,
     };
     GLushort i[] ={
             0,1,2,0,2,3
     };
+
+    std::vector<GMv6> q;
+    q.push_back({glm::vec3(0.0,0.0,0.0), glm::vec3(1.0,0.0,1.0)});
+
+    q.push_back({glm::vec3(1.5,0.0,0.0), glm::vec3(0.0,1.0,1.0)});
+    q.push_back({glm::vec3(1.5,0.5,0.0), glm::vec3(0.0,0.0,1.0)});
+    q.push_back({glm::vec3(0.0,0.5,0.0), glm::vec3(1.0,0.5,1.0)});
+
+
+
 
     //GLuint vboIds[2];
     // vboIds[0] – used to store vertex attribute data
@@ -223,8 +238,8 @@ void GLHelper::draw4() {
     glGenBuffers(2, vboIds);
 
     glBindBuffer(GL_ARRAY_BUFFER, vboIds[0]);
-    //glBufferData(GL_ARRAY_BUFFER, vtxStride * numVertices, v, GL_STATIC_DRAW);
-    glBufferData(GL_ARRAY_BUFFER, vtxStride * numVertices, &_vertices2[0], GL_STATIC_DRAW);
+    //glBufferData(GL_ARRAY_BUFFER, vtxStride * numVertices, &q[0], GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, vtxStride * numVertices, &_vertices3[0], GL_STATIC_DRAW);
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vboIds[1]);
     //glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLushort) * numIndices, i, GL_STATIC_DRAW);
@@ -251,7 +266,7 @@ void GLHelper::draw4() {
 
         glDisableVertexAttribArray(it->index);
     }
-
+    glDeleteBuffers(2,vboIds);
 
 }
 

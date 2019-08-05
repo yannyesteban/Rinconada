@@ -20,6 +20,7 @@ public:
 
     void setVertices(GLfloat * pVertices, GLint numVertices, GLint vtxStride);
     void setVertices(std::vector<glm::vec3> pVertices, GLint numVertices, GLint vtxStride);
+    void setVertices(std::vector<GMv8> pVertices, GLint numVertices, GLint vtxStride);
 
     void setIndices(GLushort * pIndices, GLint numIndices);
     void setIndices(std::vector<GLushort> pIndices2, GLint numIndices);
@@ -35,10 +36,14 @@ public:
 private:
     GLfloat* _vertices;
     std::vector<glm::vec3> _vertices2;
+
+    std::vector<GMv8> _vertices3;
+
     GLint _numVertices;
     GLint _vtxStride;
     GLushort* _indices;
     std::vector<GLushort> _indices2;
+
     GLint _numIndices;
 
     GLuint vboIds[2];

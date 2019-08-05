@@ -65,10 +65,9 @@ GLfloat left=0.0f;
 std::list<GLAttrib> lAttrib;
 
 GMMesh mesh;
+std::vector<GMv8> mesh8;
+std::vector<GLushort> vi;
 
-void fff(){
-    _LOGE("xxxx esperanza");
-}
 
 void Windows::test1x(){
     _LOGE("yyyy esperanza2222");
@@ -281,7 +280,7 @@ bool Windows::init(){
 
 //https://gitlab.com/wikibooks-opengl/modern-tutorials
     FileRead F;
-    F.print("obj/cubo4b.obj", &mesh);
+    F.print("obj/fig001.obj", &mesh);
 
     _LOGE("XXXX n mesh %hu", mesh.v.size());
     std::vector<glm::vec3>::iterator it;
@@ -301,11 +300,23 @@ bool Windows::init(){
 
     _LOGE("XXXX vi mesh %d", mesh.vi.size());
     std::vector<GLushort>::iterator it3;
+    std::vector<GLushort>::iterator it4;
+    std::vector<GLushort>::iterator it5;
+    GLushort i=0;
+    it4 = mesh.vi.begin();
+    it5 = mesh.vi.begin();
 
     for (it3 = mesh.vi.begin(); it3 != mesh.vi.end(); ++it3){
-        _LOGE("XXXX index %d", *it3);
+        mesh8.push_back({mesh.v[*it3], mesh.n[*it4], mesh.t[*it4]});
 
+        ++it4;
+        ++it5;
+
+        vi.push_back(i++);
+        _LOGE("XXXX index %d", *it3);
     }
+
+
 
    // GLfloat *c =  &mesh.v;
 
@@ -395,8 +406,9 @@ bool Windows::init(){
 
             lAttrib.push_back({VERTEX_POS_INDEX, VERTEX_POS_SIZE, "aPosition"});
             //lAttrib.push_back({VERTEX_COLOR_INDEX, VERTEX_COLOR_SIZE, "aColor"});
-            //lAttrib.push_back({VERTEX_TEXCOORD0_INDEX, VERTEX_TEXCOORD0_SIZE, "aTexture"});
-            //lAttrib.push_back({VERTEX_NORMAL_INDEX, VERTEX_NORMAL_SIZE, "aNormal"});
+            lAttrib.push_back({VERTEX_NORMAL_INDEX, VERTEX_NORMAL_SIZE, "aNormal"});
+            lAttrib.push_back({VERTEX_TEXCOORD0_INDEX, VERTEX_TEXCOORD0_SIZE, "aTexture"});
+
 
 
             glBindTexture(GL_TEXTURE_2D, text[0]);
@@ -1420,9 +1432,12 @@ void Windows::test1c() {
 void Windows::test1d() {
    // glClearColor(0.9f, 0.8f, 0.0f, 1.0f);
     glClearColor(0.2f, 0.6f, 0.0f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT);
-    //glEnable(GL_DEPTH_TEST);
-   // glDepthFunc(GL_LESS);
+
+    glEnable(GL_DEPTH_TEST);
+
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glDepthMask(GL_FALSE);
+    glDepthFunc(GL_ALWAYS);
 
     MatrixID = glGetUniformLocation(lProgram[0], "MVP");
     glUseProgram( lProgram[0]);
@@ -1430,7 +1445,7 @@ void Windows::test1d() {
     glm::mat4 Projection = glm::perspective(glm::radians(45.0f), 4.0f / 4.0f, 0.1f, 100.0f);
     // Camera matrix
     glm::mat4 View       = glm::lookAt(
-            glm::vec3(0,0,8), // Camera is at (4,3,-3), in World Space
+            glm::vec3(0,0,10), // Camera is at (4,3,-3), in World Space
             glm::vec3(0,0,0), // and looks at the origin
             glm::vec3(0,1,0)  // Head is up (set to 0,-1,0 to look upside-down)
     );
@@ -1448,8 +1463,13 @@ void Windows::test1d() {
 
     GLHelper fig;
 
-    fig.setVertices(mesh.v, mesh.v.size(), 3);
-    fig.setIndices(mesh.vi, mesh.vi.size());
+
+
+
+
+
+    fig.setVertices(mesh8, mesh8.size()*8, 8);
+    fig.setIndices(vi, vi.size());
     fig.defAttrib2(lAttrib);
 
     fig.draw4();

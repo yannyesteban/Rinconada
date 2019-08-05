@@ -20,6 +20,7 @@ struct GMMesh{
     std::vector<glm::vec3> v;
     std::vector<glm::vec2> t;
     std::vector<glm::vec3> n;
+    std::vector<glm::vec3> m;
     std::vector<GLushort> vi;
     std::vector<GLushort> ti;
     std::vector<GLushort> ni;
