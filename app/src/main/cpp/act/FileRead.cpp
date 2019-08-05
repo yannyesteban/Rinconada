@@ -211,30 +211,39 @@ int FileRead::print(const char *path, GMMesh* mesh) {
             sscanf(to.c_str(), "%s", lineHeader);
             //const char * xx, *xy, *xz;
 
-            char  xx[20], xy[20], xz[20];
             //LOGE("%s", to.c_str());
             if ( strcmp( lineHeader, "v" ) == 0 ){
-
                 glm::vec3 vertex;
                 sscanf(to.c_str(), "%*s %f %f %f", &vertex.x, &vertex.y, &vertex.z );
-
-
-
-                //sscanf(to.c_str(), "%*c %s %s %s", &xx, &xy, &xz);
-                sscanf(to.c_str(), "%*s %s %s %s", xx, xy, xz);
-
                 mesh->v.push_back(vertex);
-
-                //_LOGE("FILEREAD TORUS %f %f %f", vertex.x, vertex.y, vertex.z);
-
             }else if(strcmp( lineHeader, "vn" ) == 0){
-
-                sscanf(to.c_str(), "%*s %s %s %s", xx, xy, xz);
-
+                glm::vec3 vertex;
+                sscanf(to.c_str(), "%*s %f %f %f", &vertex.x, &vertex.y, &vertex.z );
+                mesh->n.push_back(vertex);
+            }else if(strcmp( lineHeader, "vt" ) == 0){
+                glm::vec2 vertex;
+                sscanf(to.c_str(), "%*s %f %f", &vertex.x, &vertex.y);
+                mesh->t.push_back(vertex);
 
             }else if(strcmp( lineHeader, "f" ) == 0){
 
-                sscanf(to.c_str(), "%*s %s %s %s", xx, xy, xz);
+                GLushort vIndex[3], uvIndex[3], nIndex[3];
+                sscanf(to.c_str(), "%*s %hu/%hu/%hu %hu/%hu/%hu %hu/%hu/%hu",
+                       &vIndex[0], &uvIndex[0], &nIndex[0],
+                       &vIndex[1], &uvIndex[1], &nIndex[1],
+                       &vIndex[2], &uvIndex[2], &nIndex[2]);
+                GLushort delta=1;
+                mesh->vi.push_back(vIndex[0]-delta);
+                mesh->vi.push_back(vIndex[1]-delta);
+                mesh->vi.push_back(vIndex[2]-delta);
+
+                mesh->ti.push_back(uvIndex[0]-delta);
+                mesh->ti.push_back(uvIndex[1]-delta);
+                mesh->ti.push_back(uvIndex[2]-delta);
+
+                mesh->ni.push_back(nIndex[0]-delta);
+                mesh->ni.push_back(nIndex[1]-delta);
+                mesh->ni.push_back(nIndex[2]-delta);
 
 
             }

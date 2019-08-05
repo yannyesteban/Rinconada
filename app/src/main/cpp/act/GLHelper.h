@@ -13,23 +13,32 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include "types.h"
+#include "FileRead.h"
 
 class GLHelper {
 public:
 
     void setVertices(GLfloat * pVertices, GLint numVertices, GLint vtxStride);
+    void setVertices(std::vector<glm::vec3> pVertices, GLint numVertices, GLint vtxStride);
+
     void setIndices(GLushort * pIndices, GLint numIndices);
+    void setIndices(std::vector<GLushort> pIndices2, GLint numIndices);
+
+
     void defAttrib(std::unordered_map<GLushort, GLushort>);
     void defAttrib2(std::list<GLAttrib>);
     void draw();
     void draw2();
     void draw3();
+    void draw4();
     ~GLHelper();
 private:
     GLfloat* _vertices;
+    std::vector<glm::vec3> _vertices2;
     GLint _numVertices;
     GLint _vtxStride;
     GLushort* _indices;
+    std::vector<GLushort> _indices2;
     GLint _numIndices;
 
     GLuint vboIds[2];

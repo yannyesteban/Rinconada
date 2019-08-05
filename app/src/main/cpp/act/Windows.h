@@ -33,6 +33,9 @@ class Windows {
 public:
     Windows(WindowInfo *);
 
+
+
+
     bool init();
     void start();
     void end();
@@ -46,6 +49,8 @@ public:
 
     void test1c();
     void test1d();
+
+    void test1x();
 
     void loadTexture();
     int32_t touchX;
